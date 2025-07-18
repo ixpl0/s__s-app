@@ -80,8 +80,8 @@ export const actions: Actions = {
 			const sessionToken = auth.generateSessionToken();
 			const session = await auth.createSession(sessionToken, userId);
 			auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
-		} catch {
-			return fail(500, { message: 'An error has occurred' });
+		} catch (e) {
+			return fail(500, { message: String(e) });
 		}
 		return redirect(302, '/demo/lucia');
 	},
@@ -90,8 +90,8 @@ export const actions: Actions = {
 function generateUserId() {
 	// ID with 120 bits of entropy, or about the same as UUID v4.
 	const bytes = crypto.getRandomValues(new Uint8Array(15));
-	const id = encodeBase32LowerCase(bytes);
-	return id;
+
+	return encodeBase32LowerCase(bytes);
 }
 
 function validateUsername(username: unknown): username is string {
