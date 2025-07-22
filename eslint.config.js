@@ -38,6 +38,14 @@ export default tsEslint.config(
   },
   {
     rules: {
+      // General strictness
+      'eqeqeq': ['error', 'always'],
+      'no-console': 'warn',
+      'no-debugger': 'error',
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'curly': ['error', 'all'],
+
       // Semicolon rules (best practices)
       'semi': ['error', 'always'],
       'semi-spacing': ['error', {
@@ -126,11 +134,12 @@ export default tsEslint.config(
       'indent': ['error', 2, { SwitchCase: 1 }],
       'quotes': ['error', 'single', { avoidEscape: true }],
       'no-multiple-empty-lines': ['error', {
-        max: 2,
+        max: 1,
         maxEOF: 1,
       }],
       'no-trailing-spaces': 'error',
       'eol-last': ['error', 'always'],
+      'no-useless-concat': 'error',
 
       // TypeScript strictness
       '@typescript-eslint/explicit-function-return-type': ['error', {
@@ -145,14 +154,6 @@ export default tsEslint.config(
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/no-inferrable-types': 'error',
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
-
-      // General strictness
-      'eqeqeq': ['error', 'always'],
-      'no-console': 'warn',
-      'no-debugger': 'error',
-      'no-var': 'error',
-      'prefer-const': 'error',
-      'curly': ['error', 'all'],
 
       // Svelte-specific rules (аналоги Vue правил)
       'svelte/no-unused-svelte-ignore': 'error',

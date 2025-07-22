@@ -5,6 +5,12 @@
   const onChange = (theme: Theme): void => {
     localStorage.setItem('theme', theme);
   };
+
+  const themeAriaLabel = (theme: Theme): string => {
+    const firstChar = theme.charAt(0);
+
+    return firstChar.toUpperCase() + theme.slice(1);
+  };
 </script>
 
 <div class="dropdown">
@@ -25,8 +31,7 @@
       <li>
         <input
           name="theme-dropdown"
-          aria-label={theme.charAt(0)
-            .toUpperCase() + theme.slice(1)}
+          aria-label={themeAriaLabel(theme)}
           class="theme-controller btn btn-sm btn-block btn-ghost px-3"
           on:change={() => onChange(theme)}
           type="radio"
