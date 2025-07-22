@@ -1,6 +1,6 @@
 <script lang="ts">
   interface MonthData {
-    month: string;
+    month: number;
     year: number;
     startBalance: number;
     balanceChange: number;
@@ -9,45 +9,49 @@
     expenses: number;
   }
 
+  const monthNames = Array.from({ length: 12 }, (_, i) =>
+    new Intl.DateTimeFormat('ru-RU', { month: 'long' })
+      .format(new Date(2000, i)));
+
   const monthsData: MonthData[] = [
     {
-      month: 'Июль',
+      month: 6,
       year: 2025,
-      startBalance: 15200,
-      balanceChange: 1800,
+      startBalance: 33781,
+      balanceChange: 1576,
       pocketExpenses: 380,
       income: 6800,
       expenses: 4620,
     },
     {
-      month: 'Июнь',
+      month: 5,
       year: 2025,
-      startBalance: 13400,
-      balanceChange: 2200,
+      startBalance: 32205,
+      balanceChange: 263,
       pocketExpenses: 420,
       income: 7200,
       expenses: 4580,
     },
     {
-      month: 'Май',
+      month: 4,
       year: 2025,
-      startBalance: 11200,
-      balanceChange: -650,
+      startBalance: 31942,
+      balanceChange: -654,
       pocketExpenses: 750,
       income: 5500,
       expenses: 6350,
     },
     {
-      month: 'Апрель',
+      month: 3,
       year: 2025,
-      startBalance: 11850,
+      startBalance: 29448,
       balanceChange: 3200,
       pocketExpenses: 280,
       income: 8500,
       expenses: 5020,
     },
     {
-      month: 'Март',
+      month: 2,
       year: 2025,
       startBalance: 8650,
       balanceChange: 1450,
@@ -56,7 +60,7 @@
       expenses: 4830,
     },
     {
-      month: 'Февраль',
+      month: 1,
       year: 2025,
       startBalance: 7200,
       balanceChange: -890,
@@ -65,7 +69,7 @@
       expenses: 4680,
     },
     {
-      month: 'Январь',
+      month: 0,
       year: 2025,
       startBalance: 8090,
       balanceChange: 2800,
@@ -74,7 +78,7 @@
       expenses: 4650,
     },
     {
-      month: 'Декабрь',
+      month: 11,
       year: 2024,
       startBalance: 5290,
       balanceChange: 2800,
@@ -83,7 +87,7 @@
       expenses: 2950,
     },
     {
-      month: 'Ноябрь',
+      month: 10,
       year: 2024,
       startBalance: 2490,
       balanceChange: -1200,
@@ -92,7 +96,7 @@
       expenses: 5320,
     },
     {
-      month: 'Октябрь',
+      month: 9,
       year: 2024,
       startBalance: 3690,
       balanceChange: 1800,
@@ -101,7 +105,7 @@
       expenses: 3380,
     },
     {
-      month: 'Сентябрь',
+      month: 8,
       year: 2024,
       startBalance: 1890,
       balanceChange: -800,
@@ -110,7 +114,7 @@
       expenses: 4280,
     },
     {
-      month: 'Август',
+      month: 7,
       year: 2024,
       startBalance: 2690,
       balanceChange: 3200,
@@ -119,7 +123,7 @@
       expenses: 4320,
     },
     {
-      month: 'Июль',
+      month: 6,
       year: 2024,
       startBalance: -510,
       balanceChange: -650,
@@ -128,7 +132,7 @@
       expenses: 4600,
     },
     {
-      month: 'Июнь',
+      month: 5,
       year: 2024,
       startBalance: 140,
       balanceChange: 2100,
@@ -137,7 +141,7 @@
       expenses: 4020,
     },
     {
-      month: 'Май',
+      month: 4,
       year: 2024,
       startBalance: -1960,
       balanceChange: 1450,
@@ -147,7 +151,8 @@
     },
   ];
 
-  // Группируем данные по годам
+  // TODO: Replace with real data fetching logic
+  // eslint-disable-next-line svelte/no-immutable-reactive-statements
   $: groupedData = monthsData.reduce((acc, month) => {
     if (!acc[month.year]) {
       acc[month.year] = [];
@@ -158,22 +163,17 @@
     return acc;
   }, {} as Record<number, MonthData[]>);
 
-  // Получаем отсортированные годы (от новых к старым)
   $: years = Object.keys(groupedData)
     .map(Number)
     .sort((a, b) => b - a);
 
-  function formatCurrency(amount: number): string {
-    return `$${amount.toFixed(0)}`;
-  }
-
   function getBalanceChangeClass(change: number): string {
     if (change > 0) {
-      return 'bg-success text-success-content';
+      return 'text-success';
     }
 
     if (change < 0) {
-      return 'bg-error text-error-content';
+      return 'text-error';
     }
 
     return '';
@@ -182,97 +182,157 @@
   function getPocketExpensesClass(expenses: number, income: number): string {
     const percentage = (expenses / income) * 100;
 
-    if (percentage < 15) {
-      return 'bg-success text-success-content';
+    if (percentage < 7) {
+      return 'text-success';
     }
 
-    if (percentage < 25) {
-      return 'bg-warning text-warning-content';
+    if (percentage < 14) {
+      return 'text-warning';
     }
 
-    return 'bg-error text-error-content';
+    return 'text-error';
+  }
+
+  function toUsd(n: number): string {
+    return n.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    });
   }
 </script>
 
 <div class="min-h-screen bg-base-100">
-  <div class="sticky top-0 z-10 bg-base-200 shadow-md">
-    <div class="container mx-auto px-4">
-      <div class="grid grid-cols-6 gap-4 py-4 text-sm font-semibold text-base-content">
-        <div class="text-center">Месяц</div>
-        <div class="text-center">Баланс на начало</div>
-        <div class="text-center">Изменение баланса</div>
-        <div class="text-center">Карманные расходы</div>
-        <div class="text-center">Доходы</div>
-        <div class="text-center">Расходы</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Контент с карточками месяцев -->
-  <div class="container mx-auto px-4 py-4">
+  <ul class="timeline timeline-vertical [--timeline-col-start:15ch]">
     {#each years as year (year)}
-      <!-- Sticky год -->
-      <div class="sticky top-16 z-20 bg-primary text-primary-content shadow-lg mb-4">
-        <div class="py-3 px-4">
-          <h2 class="text-xl font-bold">Бюджет {year}</h2>
+      <li>
+        <hr />
+        <div class="timeline-start">
+          <h2 class="text-xl font-bold">{year}</h2>
         </div>
-      </div>
 
-      <!-- Месяцы этого года -->
+        <div class="timeline-middle">
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+              fill="currentColor"
+              fill-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <hr />
+      </li>
+
       {#each groupedData[year] as monthData (monthData.year + monthData.month)}
-        <div class="card bg-base-100 shadow-sm mb-2 hover:shadow-md transition-shadow">
-          <div class="card-body p-4">
-            <div class="grid grid-cols-6 gap-4 items-center">
-              <!-- Месяц -->
-              <div class="text-center">
-                <div
-                  class="tooltip"
-                  data-tip="{monthData.month} {monthData.year}"
-                >
-                  <div class="badge badge-outline badge-lg">
-                    {monthData.month.substring(0, 3)}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Баланс на начало месяца -->
-              <div class="text-center">
-                <button class="btn btn-ghost btn-sm hover:btn-primary">
-                  {formatCurrency(monthData.startBalance)}
-                </button>
-              </div>
-
-              <!-- Изменение баланса -->
-              <div class="text-center">
-                <div class="badge {getBalanceChangeClass(monthData.balanceChange)} badge-lg">
-                  {monthData.balanceChange > 0 ? '+' : ''}{formatCurrency(monthData.balanceChange)}
-                </div>
-              </div>
-
-              <!-- Карманные расходы -->
-              <div class="text-center">
-                <div class="badge {getPocketExpensesClass(monthData.pocketExpenses, monthData.income)} badge-lg">
-                  {formatCurrency(monthData.pocketExpenses)}
-                </div>
-              </div>
-
-              <!-- Доходы -->
-              <div class="text-center">
-                <button class="btn btn-ghost btn-sm hover:btn-success text-success">
-                  {formatCurrency(monthData.income)}
-                </button>
-              </div>
-
-              <!-- Расходы -->
-              <div class="text-center">
-                <button class="btn btn-ghost btn-sm hover:btn-error text-error">
-                  {formatCurrency(monthData.expenses)}
-                </button>
+        <li>
+          <hr />
+          <div class="timeline-start">
+            <div
+              class="tooltip capitalize"
+              data-tip="{monthNames[monthData.month]} {monthData.year}"
+            >
+              <div class="badge badge-ghost badge-lg uppercase">
+                {monthNames[monthData.month]}
               </div>
             </div>
           </div>
-        </div>
+
+          <div class="timeline-middle">
+            <svg
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                clip-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                fill="currentColor"
+                fill-rule="evenodd"
+              />
+            </svg>
+          </div>
+
+          <div class="timeline-end stats shadow">
+            <div class="stat place-items-center">
+              <div class="stat-title">Баланс на начало месяца</div>
+              <div class="stat-value text-primary">
+                <div
+                  class="tooltip tooltip-right font-normal"
+                  data-tip="Сумма всех сбережений на начало месяца. Этого хватило бы на {Math.floor(monthData.startBalance / 3500)} мес"
+                >
+                  <button class="btn btn-ghost text-[2rem] font-extrabold">
+                    {toUsd(monthData.startBalance)}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat place-items-center">
+              <div class="stat-title text-center">Изменение баланса</div>
+              <div class="stat-value">
+                <div
+                  class="tooltip tooltip-right font-normal"
+                  data-tip="Всё, что осталось после вычета крупных расходов из общих расходов. Это деньги на еду, оплату подписок, мелкие покупки и т.д."
+                >
+                  <button class="btn btn-ghost text-[2rem] font-extrabold {getBalanceChangeClass(monthData.balanceChange)}" disabled>
+                    {toUsd(monthData.balanceChange)}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat place-items-center">
+              <div class="stat-title">Доходы</div>
+              <div class="stat-value text-success">
+                <div
+                  class="tooltip tooltip-left font-normal"
+                  data-tip="Все доходы за {monthNames[monthData.month]} {monthData.year}. Это зарплата, бонусы, подарки и т.д."
+                >
+                  <button class="btn btn-ghost text-[2rem] font-extrabold">
+                    {toUsd(monthData.income)}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat place-items-center">
+              <div class="stat-title">Крупные расходы</div>
+              <div class="stat-value text-error">
+                <div
+                  class="tooltip tooltip-left font-normal"
+                  data-tip="Все крупные расходы за {monthNames[monthData.month]} {monthData.year}. Это оплата квартиры, покупка техники, путешествия и т.д."
+                >
+                  <button class="btn btn-ghost text-[2rem] font-extrabold">
+                    {toUsd(monthData.expenses)}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="stat place-items-center">
+              <div class="stat-title text-center">Карманные расходы</div>
+              <div class="stat-value">
+                <div
+                  class="tooltip tooltip-left font-normal"
+                  data-tip="Всё, что осталось после вычета крупных расходов из общих расходов. Это деньги на еду, оплату подписок, мелкие покупки и т.д."
+                >
+                  <button class="btn btn-ghost text-[2rem] font-extrabold {getPocketExpensesClass(monthData.pocketExpenses, monthData.income)}" disabled>
+                    {toUsd(monthData.pocketExpenses)}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr />
+        </li>
       {/each}
     {/each}
-  </div>
+  </ul>
 </div>
