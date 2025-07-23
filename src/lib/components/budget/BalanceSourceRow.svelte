@@ -33,79 +33,58 @@
       amount,
     });
   }
+
+  function getCurrencySymbol(currencyCode: Currency): string {
+    const currency = currencyOptions.find((option) => option.value === currencyCode);
+
+    return currency?.symbol || '';
+  }
 </script>
 
-<div class="flex items-end gap-3 p-3 bg-base-200 rounded-lg">
-  <div class="flex-1">
-    <label class="form-control w-full">
-      <span class="label">
-        <span class="label-text">Наименование источника</span>
-      </span>
-      <input
-        bind:value={source.name}
-        class="input input-bordered w-full"
-        on:input={handleNameChange}
-        placeholder="Например: Наличка, Банк TBC"
-        type="text"
-      />
-    </label>
-  </div>
-
-  <div class="w-48">
-    <label class="form-control w-full">
-      <span class="label">
-        <span class="label-text">Валюта</span>
-      </span>
-      <select
-        bind:value={source.currency}
-        class="select select-bordered"
-        on:change={handleCurrencyChange}
-      >
-        {#each currencyOptions as option (option.value)}
-          <option value={option.value}>
-            {option.symbol} {option.label}
-          </option>
-        {/each}
-      </select>
-    </label>
-  </div>
-
-  <div class="w-32">
-    <label class="form-control w-full">
-      <span class="label">
-        <span class="label-text">Сумма</span>
-      </span>
+<tr>
+  <td class="w-auto">
+    <input
+      bind:value={source.name}
+      class="input input-bordered w-full"
+      on:input={handleNameChange}
+      placeholder="Наличка, Банк TBC"
+      type="text"
+    />
+  </td>
+  <td class="w-56">
+    <select
+      bind:value={source.currency}
+      class="select select-bordered w-full"
+      on:change={handleCurrencyChange}
+    >
+      {#each currencyOptions as option (option.value)}
+        <option value={option.value}>{option.label}</option>
+      {/each}
+    </select>
+  </td>
+  <td class="w-48">
+    <div class="join w-full">
       <input
         bind:value={source.amount}
-        class="input input-bordered w-full"
+        class="join-item input input-bordered flex-1"
         min="0"
         on:input={handleAmountChange}
+        placeholder="0"
         step="0.01"
         type="number"
       />
-    </label>
-  </div>
-
-  <div>
+      <span class="join-item flex items-center justify-center text-sm font-medium w-10 bg-base-200">
+        {getCurrencySymbol(source.currency)}
+      </span>
+    </div>
+  </td>
+  <td class="w-fit text-center">
     <button
-      aria-label="Удалить источник"
-      class="btn btn-ghost btn-square hover:bg-error hover:text-error-content"
+      class="btn btn-ghost btn-xs hover:bg-error hover:text-error-content"
       on:click={onDelete}
       type="button"
     >
-      <svg
-        class="w-4 h-4"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M6 18L18 6M6 6l12 12"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-        />
-      </svg>
+      ✕
     </button>
-  </div>
-</div>
+  </td>
+</tr>

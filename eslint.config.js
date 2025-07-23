@@ -164,7 +164,7 @@ export default tsEslint.config(
       'svelte/require-each-key': 'error',
       'svelte/html-self-closing': ['error', {
         void: 'always',
-        normal: 'always',
+        normal: 'never',
         component: 'always',
         svelte: 'always',
       }],
@@ -175,7 +175,7 @@ export default tsEslint.config(
       }],
       'svelte/indent': ['error', {
         indent: 2,
-        switchCase: 1,
+        switchCase: 2,
       }],
       'svelte/max-attributes-per-line': ['error', {
         multiline: 1,

@@ -51,7 +51,7 @@
 </script>
 
 <dialog class="modal" class:modal-open={isOpen} on:click={handleBackdropClick}>
-  <div class="modal-box w-11/12 max-w-5xl my-16 max-h-[calc(100vh-8rem)] h-auto">
+  <div class="modal-box w-11/12 max-w-5xl">
     <form method="dialog">
       <button
         class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
@@ -66,14 +66,26 @@
       Баланс на начало {monthName.toLowerCase()} {year}
     </h3>
 
-    <div class="space-y-4">
-      {#each sources as source, index (source.id)}
-        <BalanceSourceRow
-          onDelete={() => deleteSource(index)}
-          onUpdate={(updatedSource) => updateSource(index, updatedSource)}
-          {source}
-        />
-      {/each}
+    <div class="overflow-x-auto max-h-[calc(100vh-16rem)]">
+      <table class="table table-xs table-pin-rows w-full [&_tr]:border-0">
+        <thead>
+          <tr>
+            <th class="w-auto">Источник</th>
+            <th class="w-48">Валюта</th>
+            <th class="w-44">Сумма</th>
+            <th class="w-12 text-center"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each sources as source, index (source.id)}
+            <BalanceSourceRow
+              onDelete={() => deleteSource(index)}
+              onUpdate={(updatedSource) => updateSource(index, updatedSource)}
+              {source}
+            />
+          {/each}
+        </tbody>
+      </table>
     </div>
 
     <div class="flex justify-between items-center mt-6">
