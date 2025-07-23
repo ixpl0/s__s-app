@@ -1,11 +1,16 @@
 <script lang="ts">
   import type { MonthData } from '$lib/types/budget';
-  import {
-    getBalanceChangeClass, getPocketExpensesClass, toUsd,
-  } from '$lib/utils/budget';
+  import { getBalanceChangeClass, getPocketExpensesClass, toUsd } from '$lib/utils/budget';
+  import BalanceModal from './BalanceModal.svelte';
 
   export let monthData: MonthData;
   export let monthNames: string[];
+
+  let isBalanceModalOpen = false;
+
+  function openBalanceModal(): void {
+    isBalanceModalOpen = true;
+  }
 </script>
 
 <li>
@@ -34,7 +39,7 @@
       <div class="stat-title">Баланс на начало месяца</div>
       <div class="stat-value text-primary">
         <div class="tooltip tooltip-right font-normal" data-tip="Сумма всех сбережений на начало месяца. Этого хватило бы на {Math.floor(monthData.startBalance / 3500)} мес">
-          <button class="btn btn-ghost text-[2rem] font-extrabold">
+          <button class="btn btn-ghost text-[2rem] font-extrabold" on:click={openBalanceModal}>
             {toUsd(monthData.startBalance)}
           </button>
         </div>
@@ -88,3 +93,10 @@
   <hr />
 </li>
 
+{#if isBalanceModalOpen}
+  <BalanceModal
+    bind:isOpen={isBalanceModalOpen}
+    monthName={monthNames[monthData.month]}
+    year={monthData.year}
+  />
+{/if}

@@ -10,7 +10,7 @@
 <li>
   <hr />
   <div class="timeline-start">
-    <h2 class="text-xl font-bold">{year}</h2>
+    <h2 class="text-3xl font-bold">{year}</h2>
   </div>
   <div class="timeline-middle">
     <svg class="h-5 w-5" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">

@@ -240,18 +240,18 @@ export default tsEslint.config(
         ObjectExpression: {
           multiline: true,
           minProperties: 3,
+          consistent: true,
         },
         ObjectPattern: {
           multiline: true,
           minProperties: 3,
+          consistent: true,
         },
-        ImportDeclaration: {
-          multiline: true,
-          minProperties: 3,
-        },
+        ImportDeclaration: 'never',
         ExportDeclaration: {
           multiline: true,
           minProperties: 3,
+          consistent: true,
         },
       }],
       '@stylistic/object-property-newline': ['error', { allowAllPropertiesOnSameLine: false }],
