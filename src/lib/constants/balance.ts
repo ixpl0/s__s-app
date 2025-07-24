@@ -1,6 +1,6 @@
-import type { CurrencyOption, BalanceSource } from '$lib/types/balance';
+import type { Currency, BalanceSource } from '$lib/types/balance';
 
-export const currencyOptions: CurrencyOption[] = [
+export const currencyOptions: Currency[] = [
   {
     value: 'USD',
     label: 'Доллары США',

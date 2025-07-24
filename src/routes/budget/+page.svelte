@@ -1,7 +1,7 @@
 <script lang="ts">
   import YearSection from '$lib/components/budget/YearSection.svelte';
   import type { MonthData } from '$lib/types/budget';
-  import { monthsData, monthNames } from '$lib/data/budget';
+  import { monthsData, monthNames } from '$lib/constants/budget';
 
   // TODO: Replace with real data fetching logic
   // eslint-disable-next-line svelte/no-immutable-reactive-statements

@@ -1,12 +1,14 @@
 <script lang="ts">
-  import type { BalanceSource } from '$lib/types/balance';
-  import { mockBalanceSources } from '$lib/data/balance';
+  import type { BalanceSource, Currency } from '$lib/types/balance';
+  import { mockBalanceSources, currencyOptions } from '$lib/constants/balance';
+  import { getCurrencySymbol } from '$lib/utils/currency';
   import BalanceSourceRow from './BalanceSourceRow.svelte';
 
   export let isOpen = false;
   export let monthName = '';
   export let year = 0;
 
+  const mainCurrency: Currency = currencyOptions.find(({ value }) => value === 'USD') ?? currencyOptions[0];
   let sources: BalanceSource[] = [...mockBalanceSources];
 
   function closeModal(): void {
@@ -73,7 +75,8 @@
             <th class="w-auto">Источник</th>
             <th class="w-48">Валюта</th>
             <th class="w-44">Сумма</th>
-            <th class="w-12 text-center"></th>
+            <th class="w-44">Курс к {getCurrencySymbol(mainCurrency.value)}</th>
+            <th class="w-12"></th>
           </tr>
         </thead>
         <tbody>

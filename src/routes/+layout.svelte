@@ -11,5 +11,5 @@
 </header>
 
 <main class="container mx-auto px-4">
-  <slot />
+  <slot></slot>
 </main>

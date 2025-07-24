@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { BalanceSource, Currency } from '$lib/types/balance';
-  import { currencyOptions } from '$lib/data/balance';
+  import type { BalanceSource, CurrencyValue } from '$lib/types/balance';
+  import { currencyOptions } from '$lib/constants/balance';
+  import { getCurrencySymbol } from '$lib/utils/currency';
 
   export let source: BalanceSource;
   export let onUpdate: (updatedSource: BalanceSource) => void;
@@ -20,7 +21,7 @@
 
     onUpdate({
       ...source,
-      currency: target.value as Currency,
+      currency: target.value as CurrencyValue,
     });
   }
 
@@ -33,16 +34,10 @@
       amount,
     });
   }
-
-  function getCurrencySymbol(currencyCode: Currency): string {
-    const currency = currencyOptions.find((option) => option.value === currencyCode);
-
-    return currency?.symbol || '';
-  }
 </script>
 
 <tr>
-  <td class="w-auto">
+  <td>
     <input
       bind:value={source.name}
       class="input input-bordered w-full"
@@ -51,7 +46,8 @@
       type="text"
     />
   </td>
-  <td class="w-56">
+
+  <td>
     <select
       bind:value={source.currency}
       class="select select-bordered w-full"
@@ -62,7 +58,8 @@
       {/each}
     </select>
   </td>
-  <td class="w-48">
+
+  <td>
     <div class="join w-full">
       <input
         bind:value={source.amount}
@@ -78,7 +75,20 @@
       </span>
     </div>
   </td>
-  <td class="w-fit text-center">
+
+  <td>
+    <input
+      bind:value={source.amount}
+      class="join-item input input-bordered flex-1"
+      min="0"
+      on:input={handleAmountChange}
+      placeholder="0"
+      step="0.01"
+      type="number"
+    />
+  </td>
+
+  <td class="text-center">
     <button
       class="btn btn-ghost btn-xs hover:bg-error hover:text-error-content"
       on:click={onDelete}

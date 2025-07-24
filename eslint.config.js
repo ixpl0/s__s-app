@@ -227,7 +227,6 @@ export default tsEslint.config(
     plugins: { '@stylistic': stylistic },
     rules: {
       // Method chaining and arrow functions
-      '@stylistic/newline-per-chained-call': ['error', { ignoreChainWithDepth: 1 }],
       '@stylistic/dot-location': ['error', 'property'],
       '@stylistic/arrow-parens': ['error', 'always'],
       '@stylistic/arrow-spacing': ['error', {
