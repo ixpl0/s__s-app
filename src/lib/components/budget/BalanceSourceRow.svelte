@@ -3,6 +3,7 @@
   import { currencyOptions } from '$lib/constants/balance';
   import { balanceSourceSchema } from '$lib/types/api';
   import { z } from 'zod';
+  import { page } from '$app/stores';
 
   type BalanceSourceWithValidation = BalanceSource & {
     hasNameError?: boolean;
@@ -14,9 +15,29 @@
   export let onDelete: () => void;
   export let exchangeRates: Record<string, number> = {};
 
-  $: currentRate = exchangeRates[source.currency] || 1;
-  $: formattedRate =
-    source.currency === 'USD' ? '1.00' : currentRate.toFixed(2);
+  $: userSettings = $page.data.userSettings;
+  $: baseCurrency = userSettings?.baseCurrency || 'USD';
+
+  $: currentRate = (() => {
+    if (source.currency === baseCurrency) {
+      return 1;
+    }
+
+    if (baseCurrency === 'USD') {
+      return exchangeRates[source.currency] || 1;
+    }
+
+    if (source.currency === 'USD') {
+      return 1 / (exchangeRates[baseCurrency] || 1);
+    }
+
+    const sourceToUsd = exchangeRates[source.currency] || 1;
+    const baseToUsd = exchangeRates[baseCurrency] || 1;
+
+    return sourceToUsd / baseToUsd;
+  })();
+
+  $: formattedRate = currentRate.toFixed(2);
   $: hasNameError =
     (source as BalanceSourceWithValidation).hasNameError || false;
   $: validationError = (source as BalanceSourceWithValidation).validationError;

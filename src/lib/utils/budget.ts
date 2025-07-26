@@ -1,3 +1,6 @@
+import type { CurrencyValue } from '$lib/types/balance';
+import { formatCurrency, convertCurrency } from './currency';
+
 export function getBalanceChangeClass(change: number): string {
   if (change > 0) {
     return 'text-success';
@@ -27,10 +30,27 @@ export function getPocketExpensesClass(
   return 'text-error';
 }
 
-export function toUsd(n: number): string {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  });
+export function formatAmount(
+  amount: number,
+  baseCurrency: CurrencyValue,
+): string {
+  return formatCurrency(amount, baseCurrency);
+}
+
+export function calculateTotalBalance(
+  balanceSources: { currency: CurrencyValue; amount: number }[],
+  baseCurrency: CurrencyValue,
+  exchangeRates: Record<string, number> = {},
+): number {
+  const total = balanceSources.reduce((sum, source) => {
+    const convertedAmount = convertCurrency(
+      source.amount,
+      source.currency,
+      baseCurrency,
+      exchangeRates,
+    );
+    return sum + convertedAmount;
+  }, 0);
+
+  return Math.round(total * 100) / 100;
 }

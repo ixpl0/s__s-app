@@ -80,6 +80,17 @@ export const expenseEntries = sqliteTable('expense_entries', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 });
 
+export const userSettings = sqliteTable('user_settings', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .unique()
+    .references(() => user.id),
+  baseCurrency: text('base_currency').notNull().default('USD'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+});
+
 export type User = typeof user.$inferSelect;
 export type Session = typeof session.$inferSelect;
 export type ExchangeRates = typeof exchangeRates.$inferSelect;
@@ -87,3 +98,4 @@ export type UserMonth = typeof userMonths.$inferSelect;
 export type BalanceSource = typeof balanceSources.$inferSelect;
 export type IncomeEntry = typeof incomeEntries.$inferSelect;
 export type ExpenseEntry = typeof expenseEntries.$inferSelect;
+export type UserSettings = typeof userSettings.$inferSelect;

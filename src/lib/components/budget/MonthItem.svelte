@@ -3,17 +3,22 @@
   import {
     getBalanceChangeClass,
     getPocketExpensesClass,
-    toUsd,
+    formatAmount,
+    calculateTotalBalance,
   } from '$lib/utils/budget';
   import BalanceModal from './BalanceModal.svelte';
   import { userMonthService } from '$lib/services/user-month-service';
   import { handleError } from '$lib/utils/error-handling';
+  import { page } from '$app/stores';
 
   export let monthData: MonthData;
   export let monthNames: string[];
   export let exchangeRates: Record<string, Record<string, number>>;
 
   let isBalanceModalOpen = false;
+
+  $: userSettings = $page.data.userSettings;
+  $: baseCurrency = userSettings?.baseCurrency || 'USD';
 
   $: currentMonthRates = (() => {
     const rateDate = `${monthData.year}-${String(monthData.month + 1).padStart(2, '0')}-01`;
@@ -22,8 +27,7 @@
     if (typeof rates === 'string') {
       try {
         return JSON.parse(rates);
-      } catch (error) {
-        console.error('Failed to parse exchange rates:', error);
+      } catch {
         return {};
       }
     }
@@ -32,16 +36,11 @@
   })();
 
   // Calculate startBalance on frontend from balance sources
-  $: startBalance = (() => {
-    const total = monthData.balanceSources.reduce((sum, source) => {
-      const rate =
-        source.currency === 'USD' ? 1 : currentMonthRates[source.currency] || 1;
-      const convertedAmount = source.amount / rate;
-      return sum + convertedAmount;
-    }, 0);
-
-    return Math.round(total * 100) / 100;
-  })();
+  $: startBalance = calculateTotalBalance(
+    monthData.balanceSources,
+    baseCurrency,
+    currentMonthRates,
+  );
 
   async function openBalanceModal(): Promise<void> {
     if (!monthData.userMonthId || monthData.userMonthId.trim() === '') {
@@ -104,7 +103,7 @@
             class="btn btn-ghost text-[2rem] font-extrabold"
             on:click={openBalanceModal}
           >
-            {toUsd(startBalance)}
+            {formatAmount(startBalance, baseCurrency)}
           </button>
         </div>
       </div>
@@ -123,7 +122,7 @@
             )}"
             disabled
           >
-            {toUsd(monthData.balanceChange)}
+            {formatAmount(monthData.balanceChange, baseCurrency)}
           </button>
         </div>
       </div>
@@ -139,7 +138,7 @@
           ]} {monthData.year}. Это зарплата, бонусы, подарки и т.д."
         >
           <button class="btn btn-ghost text-[2rem] font-extrabold">
-            {toUsd(monthData.income)}
+            {formatAmount(monthData.income, baseCurrency)}
           </button>
         </div>
       </div>
@@ -152,10 +151,10 @@
           class="tooltip tooltip-left font-normal"
           data-tip="Все крупные расходы за {monthNames[
             monthData.month
-          ]} {monthData.year}. ��то оплата квартиры, покупка техники, путешествия и т.д."
+          ]} {monthData.year}. Это оплата квартиры, покупка техники, путешествия и т.д."
         >
           <button class="btn btn-ghost text-[2rem] font-extrabold">
-            {toUsd(monthData.expenses)}
+            {formatAmount(monthData.expenses, baseCurrency)}
           </button>
         </div>
       </div>
@@ -175,7 +174,7 @@
             )}"
             disabled
           >
-            {toUsd(monthData.pocketExpenses)}
+            {formatAmount(monthData.pocketExpenses, baseCurrency)}
           </button>
         </div>
       </div>

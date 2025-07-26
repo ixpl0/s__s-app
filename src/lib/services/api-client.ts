@@ -13,7 +13,7 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
-  private async request<T>(
+  async request<T>(
     endpoint: string,
     options: RequestOptions = {},
   ): Promise<ApiResult<T>> {
@@ -125,3 +125,20 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient('/api');
+
+export async function safeRequest<T>(
+  endpoint: string,
+  options: RequestOptions = {},
+): Promise<T | null> {
+  const cleanEndpoint = endpoint.startsWith('/api')
+    ? endpoint.slice(4)
+    : endpoint;
+  const result = await apiClient.request<T>(cleanEndpoint, options);
+
+  if (!result.success) {
+    handleApiError(result, `safeRequest ${endpoint}`);
+    return null;
+  }
+
+  return result.data;
+}

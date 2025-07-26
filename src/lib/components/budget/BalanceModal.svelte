@@ -4,6 +4,8 @@
   import { invalidateAll } from '$app/navigation';
   import { balanceService } from '$lib/services/balance-service';
   import { loading } from '$lib/stores/loading';
+  import { calculateTotalBalance, formatAmount } from '$lib/utils/budget';
+  import { page } from '$app/stores';
 
   export let isOpen = false;
   export let monthName = '';
@@ -15,6 +17,9 @@
 
   $: isLoading = $loading['balance-sources-load'] || false;
   $: isSaving = $loading['balance-sources-save'] || false;
+  $: userSettings = $page.data.userSettings;
+  $: baseCurrency = userSettings?.baseCurrency || 'USD';
+  $: totalBalance = calculateTotalBalance(sources, baseCurrency, exchangeRates);
 
   $: if (isOpen && userMonthId) {
     loadBalanceSources();
@@ -122,7 +127,7 @@
 
     <h3 class="font-bold text-lg mb-4">
       Баланс на начало {monthName.toLowerCase()}
-      {year}
+      {year} — {formatAmount(totalBalance, baseCurrency)}
     </h3>
 
     {#if isLoading}
@@ -139,7 +144,7 @@
               <th class="w-auto">Источник</th>
               <th class="w-48">Валюта</th>
               <th class="w-44">Сумма</th>
-              <th class="w-32">Курс к USD</th>
+              <th class="w-32">Курс к {baseCurrency}</th>
               <th class="w-12"></th>
             </tr>
           </thead>
