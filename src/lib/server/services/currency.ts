@@ -7,7 +7,9 @@ export type ExchangeRateData = Record<string, number>;
 
 const cache = new Map<string, ExchangeRateData>();
 
-export async function getExchangeRates(date: string): Promise<ExchangeRateData | null> {
+export async function getExchangeRates(
+  date: string,
+): Promise<ExchangeRateData | null> {
   if (cache.has(date)) {
     const cachedResult = cache.get(date);
 
@@ -71,7 +73,10 @@ export async function convertFromUSD(
   return amount * rates[toCurrency];
 }
 
-export async function saveExchangeRates(date: string, rates: ExchangeRateData): Promise<void> {
+export async function saveExchangeRates(
+  date: string,
+  rates: ExchangeRateData,
+): Promise<void> {
   await db
     .insert(exchangeRates)
     .values({
@@ -92,7 +97,9 @@ export function clearCache(): void {
   cache.clear();
 }
 
-export async function getExchangeRatesForDates(dates: string[]): Promise<Record<string, Record<string, number>>> {
+export async function getExchangeRatesForDates(
+  dates: string[],
+): Promise<Record<string, Record<string, number>>> {
   try {
     const results = await db
       .select()

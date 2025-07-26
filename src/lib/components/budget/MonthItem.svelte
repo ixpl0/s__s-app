@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { MonthData } from '$lib/types/budget';
-  import { getBalanceChangeClass, getPocketExpensesClass, toUsd } from '$lib/utils/budget';
+  import {
+    getBalanceChangeClass,
+    getPocketExpensesClass,
+    toUsd,
+  } from '$lib/utils/budget';
   import BalanceModal from './BalanceModal.svelte';
   import { userMonthService } from '$lib/services/user-month-service';
 
@@ -37,7 +41,10 @@
 <li>
   <hr />
   <div class="timeline-start">
-    <div class="tooltip capitalize" data-tip="{monthNames[monthData.month]} {monthData.year}">
+    <div
+      class="tooltip capitalize"
+      data-tip="{monthNames[monthData.month]} {monthData.year}"
+    >
       <div class="badge badge-ghost badge-lg uppercase">
         {monthNames[monthData.month]}
       </div>
@@ -59,8 +66,16 @@
     <div class="stat place-items-center">
       <div class="stat-title">Баланс на начало месяца</div>
       <div class="stat-value text-primary">
-        <div class="tooltip tooltip-right font-normal" data-tip="Сумма всех сбережений на начало месяца. Этого хватило бы на {Math.floor(monthData.startBalance / 3500)} мес">
-          <button class="btn btn-ghost text-[2rem] font-extrabold" on:click={openBalanceModal}>
+        <div
+          class="tooltip tooltip-right font-normal"
+          data-tip="Сумма всех сбережений на начало месяца. Этого хватило бы на {Math.floor(
+            monthData.startBalance / 3500,
+          )} мес"
+        >
+          <button
+            class="btn btn-ghost text-[2rem] font-extrabold"
+            on:click={openBalanceModal}
+          >
             {toUsd(monthData.startBalance)}
           </button>
         </div>
@@ -70,8 +85,16 @@
     <div class="stat place-items-center">
       <div class="stat-title text-center">Изменение баланса</div>
       <div class="stat-value">
-        <div class="tooltip tooltip-right font-normal" data-tip="Всё, что осталось после вычета крупных расходов из общих расходов. Это деньги на еду, оплату подписок, мелкие покупки и т.д.">
-          <button class="btn btn-ghost text-[2rem] font-extrabold {getBalanceChangeClass(monthData.balanceChange)}" disabled>
+        <div
+          class="tooltip tooltip-right font-normal"
+          data-tip="Всё, что осталось после вычета крупных расходов из общих расходов. Это деньги на еду, оплату подписок, мелкие покупки и т.д."
+        >
+          <button
+            class="btn btn-ghost text-[2rem] font-extrabold {getBalanceChangeClass(
+              monthData.balanceChange,
+            )}"
+            disabled
+          >
             {toUsd(monthData.balanceChange)}
           </button>
         </div>
@@ -81,7 +104,12 @@
     <div class="stat place-items-center">
       <div class="stat-title">Доходы</div>
       <div class="stat-value text-success">
-        <div class="tooltip tooltip-left font-normal" data-tip="Все доходы за {monthNames[monthData.month]} {monthData.year}. Это зарплата, бонусы, подарки и т.д.">
+        <div
+          class="tooltip tooltip-left font-normal"
+          data-tip="Все доходы за {monthNames[
+            monthData.month
+          ]} {monthData.year}. Это зарплата, бонусы, подарки и т.д."
+        >
           <button class="btn btn-ghost text-[2rem] font-extrabold">
             {toUsd(monthData.income)}
           </button>
@@ -92,7 +120,12 @@
     <div class="stat place-items-center">
       <div class="stat-title">Крупные расходы</div>
       <div class="stat-value text-error">
-        <div class="tooltip tooltip-left font-normal" data-tip="Все крупные расходы за {monthNames[monthData.month]} {monthData.year}. ��то оплата квартиры, покупка техники, путешествия и т.д.">
+        <div
+          class="tooltip tooltip-left font-normal"
+          data-tip="Все крупные расходы за {monthNames[
+            monthData.month
+          ]} {monthData.year}. ��то оплата квартиры, покупка техники, путешествия и т.д."
+        >
           <button class="btn btn-ghost text-[2rem] font-extrabold">
             {toUsd(monthData.expenses)}
           </button>
@@ -103,8 +136,17 @@
     <div class="stat place-items-center">
       <div class="stat-title text-center">Карманные расходы</div>
       <div class="stat-value">
-        <div class="tooltip tooltip-left font-normal" data-tip="Всё, что осталось после вычета крупных расходов из общих расходов. Это деньги на еду, оплату подписок, мелкие покупки и т.д.">
-          <button class="btn btn-ghost text-[2rem] font-extrabold {getPocketExpensesClass(monthData.pocketExpenses, monthData.income)}" disabled>
+        <div
+          class="tooltip tooltip-left font-normal"
+          data-tip="Всё, что осталось после вычета крупных расходов из общих расходов. Это деньги на еду, оплату подписок, мелкие покупки и т.д."
+        >
+          <button
+            class="btn btn-ghost text-[2rem] font-extrabold {getPocketExpensesClass(
+              monthData.pocketExpenses,
+              monthData.income,
+            )}"
+            disabled
+          >
             {toUsd(monthData.pocketExpenses)}
           </button>
         </div>

@@ -9,7 +9,11 @@ export interface Toast {
 
 export const toasts = writable<Toast[]>([]);
 
-export function addToast(message: string, type: Toast['type'] = 'info', duration = 4000): void {
+export function addToast(
+  message: string,
+  type: Toast['type'] = 'info',
+  duration = 4000,
+): void {
   const id = Math.random().toString(36).substring(2, 9);
 
   const toast: Toast = {
@@ -29,12 +33,18 @@ export function addToast(message: string, type: Toast['type'] = 'info', duration
 }
 
 export function removeToast(id: string): void {
-  toasts.update((currentToasts) => currentToasts.filter((toast) => toast.id !== id));
+  toasts.update((currentToasts) =>
+    currentToasts.filter((toast) => toast.id !== id),
+  );
 }
 
 export const toast = {
-  success: (message: string, duration?: number): void => addToast(message, 'success', duration),
-  error: (message: string, duration?: number): void => addToast(message, 'error', duration),
-  warning: (message: string, duration?: number): void => addToast(message, 'warning', duration),
-  info: (message: string, duration?: number): void => addToast(message, 'info', duration),
+  success: (message: string, duration?: number): void =>
+    addToast(message, 'success', duration),
+  error: (message: string, duration?: number): void =>
+    addToast(message, 'error', duration),
+  warning: (message: string, duration?: number): void =>
+    addToast(message, 'warning', duration),
+  info: (message: string, duration?: number): void =>
+    addToast(message, 'info', duration),
 };

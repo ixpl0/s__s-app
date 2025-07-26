@@ -1,8 +1,8 @@
 import type { MonthData } from '$lib/types/budget';
 
 export const monthNames = Array.from({ length: 12 }, (_, i) =>
-  new Intl.DateTimeFormat('ru-RU', { month: 'long' })
-    .format(new Date(2000, i)));
+  new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(new Date(2000, i)),
+);
 
 export const monthsData: MonthData[] = [
   {

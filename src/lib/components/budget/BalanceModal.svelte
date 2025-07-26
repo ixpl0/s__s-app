@@ -65,9 +65,7 @@
   }
 
   function generateId(): string {
-    return Math.random()
-      .toString(36)
-      .substring(2, 9);
+    return Math.random().toString(36).substring(2, 9);
   }
 
   function addNewSource(): void {
@@ -82,7 +80,9 @@
   }
 
   function updateSource(index: number, updatedSource: BalanceSource): void {
-    sources = sources.map((source, i) => (i === index ? updatedSource : source));
+    sources = sources.map((source, i) =>
+      i === index ? updatedSource : source,
+    );
   }
 
   async function deleteSource(index: number): Promise<void> {
@@ -154,7 +154,9 @@
       toast.success('Данные успешно сохранены');
       closeModal();
     } catch (error) {
-      toast.error(`Ошибка при сохранении данных: ${error instanceof Error ? error.message : String(error)}`);
+      toast.error(
+        `Ошибка при сохранении данных: ${error instanceof Error ? error.message : String(error)}`,
+      );
     } finally {
       isSaving = false;
     }
@@ -174,7 +176,8 @@
     </form>
 
     <h3 class="font-bold text-lg mb-4">
-      Баланс на начало {monthName.toLowerCase()} {year}
+      Баланс на начало {monthName.toLowerCase()}
+      {year}
     </h3>
 
     {#if isLoading}
@@ -183,7 +186,9 @@
       </div>
     {:else}
       <div class="overflow-x-auto max-h-[calc(100vh-16rem)]">
-        <table class="table table-xs table-pin-rows w-full [&_tr]:border-0 [&_td]:align-top">
+        <table
+          class="table table-xs table-pin-rows w-full [&_tr]:border-0 [&_td]:align-top"
+        >
           <thead>
             <tr>
               <th class="w-auto">Источник</th>
@@ -208,11 +213,7 @@
 
       <div class="flex justify-between items-center mt-6">
         <button class="btn btn-primary" on:click={addNewSource} type="button">
-          <svg
-            class="w-4 h-4 mr-2"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg class="w-4 h-4 mr-2" stroke="currentColor" viewBox="0 0 24 24">
             <path
               d="M12 4v16m8-8H4"
               fill="none"

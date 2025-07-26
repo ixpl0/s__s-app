@@ -8,7 +8,9 @@ export const user = sqliteTable('user', {
 
 export const session = sqliteTable('session', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => user.id),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
 });
 
@@ -19,7 +21,9 @@ export const exchangeRates = sqliteTable('exchange_rates', {
 
 export const userMonths = sqliteTable('user_months', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => user.id),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id),
   year: integer('year').notNull(),
   month: integer('month').notNull(), // 0-11
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
@@ -28,7 +32,9 @@ export const userMonths = sqliteTable('user_months', {
 
 export const balanceSources = sqliteTable('balance_sources', {
   id: text('id').primaryKey(),
-  userMonthId: text('user_month_id').notNull().references(() => userMonths.id),
+  userMonthId: text('user_month_id')
+    .notNull()
+    .references(() => userMonths.id),
   name: text('name').notNull(),
   currency: text('currency').notNull(), // USD, RUB, GEL, TRY, THB, INR
   amount: real('amount').notNull().default(0),
@@ -38,7 +44,9 @@ export const balanceSources = sqliteTable('balance_sources', {
 
 export const incomeEntries = sqliteTable('income_entries', {
   id: text('id').primaryKey(),
-  userMonthId: text('user_month_id').notNull().references(() => userMonths.id),
+  userMonthId: text('user_month_id')
+    .notNull()
+    .references(() => userMonths.id),
   description: text('description').notNull(),
   amount: real('amount').notNull(),
   currency: text('currency').notNull(),
@@ -49,7 +57,9 @@ export const incomeEntries = sqliteTable('income_entries', {
 
 export const expenseEntries = sqliteTable('expense_entries', {
   id: text('id').primaryKey(),
-  userMonthId: text('user_month_id').notNull().references(() => userMonths.id),
+  userMonthId: text('user_month_id')
+    .notNull()
+    .references(() => userMonths.id),
   description: text('description').notNull(),
   amount: real('amount').notNull(),
   currency: text('currency').notNull(),
@@ -58,10 +68,10 @@ export const expenseEntries = sqliteTable('expense_entries', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 });
 
-export type User         = typeof user.$inferSelect;
-export type Session      = typeof session.$inferSelect;
+export type User = typeof user.$inferSelect;
+export type Session = typeof session.$inferSelect;
 export type ExchangeRates = typeof exchangeRates.$inferSelect;
-export type UserMonth      = typeof userMonths.$inferSelect;
-export type BalanceSource  = typeof balanceSources.$inferSelect;
-export type IncomeEntry    = typeof incomeEntries.$inferSelect;
-export type ExpenseEntry   = typeof expenseEntries.$inferSelect;
+export type UserMonth = typeof userMonths.$inferSelect;
+export type BalanceSource = typeof balanceSources.$inferSelect;
+export type IncomeEntry = typeof incomeEntries.$inferSelect;
+export type ExpenseEntry = typeof expenseEntries.$inferSelect;

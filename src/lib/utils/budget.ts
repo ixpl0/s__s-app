@@ -10,7 +10,10 @@ export function getBalanceChangeClass(change: number): string {
   return '';
 }
 
-export function getPocketExpensesClass(expenses: number, income: number): string {
+export function getPocketExpensesClass(
+  expenses: number,
+  income: number,
+): string {
   const percentage = (expenses / income) * 100;
 
   if (percentage < 7) {
@@ -31,4 +34,3 @@ export function toUsd(n: number): string {
     maximumFractionDigits: 0,
   });
 }
-

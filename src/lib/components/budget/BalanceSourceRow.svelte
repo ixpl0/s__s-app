@@ -13,8 +13,10 @@
   export let exchangeRates: Record<string, number> = {};
 
   $: currentRate = exchangeRates[source.currency] || 1;
-  $: formattedRate = source.currency === 'USD' ? '1.00' : currentRate.toFixed(2);
-  $: hasNameError = (source as BalanceSourceWithValidation).hasNameError || false;
+  $: formattedRate =
+    source.currency === 'USD' ? '1.00' : currentRate.toFixed(2);
+  $: hasNameError =
+    (source as BalanceSourceWithValidation).hasNameError || false;
 
   function handleNameChange(event: Event): void {
     const target = event.target as HTMLInputElement;
@@ -88,7 +90,9 @@
         step="1"
         type="number"
       />
-      <span class="join-item flex items-center justify-center text-sm font-medium w-10 bg-base-200">
+      <span
+        class="join-item flex items-center justify-center text-sm font-medium w-10 bg-base-200"
+      >
         {getCurrencySymbol(source.currency)}
       </span>
     </div>

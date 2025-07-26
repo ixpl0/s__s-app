@@ -1,5 +1,10 @@
 import { db } from './index';
-import { userMonths, balanceSources, incomeEntries, expenseEntries } from './schema';
+import {
+  userMonths,
+  balanceSources,
+  incomeEntries,
+  expenseEntries,
+} from './schema';
 import type { CurrencyValue } from '$lib/types/balance';
 import { eq, and, desc } from 'drizzle-orm';
 
@@ -32,33 +37,46 @@ export interface CreateExpenseEntryData {
   date: string;
 }
 
-export async function createUserMonth(data: CreateUserMonthData): Promise<typeof userMonths.$inferSelect[]> {
+export async function createUserMonth(
+  data: CreateUserMonthData,
+): Promise<(typeof userMonths.$inferSelect)[]> {
   const now = new Date();
   const id = crypto.randomUUID();
 
-  return await db.insert(userMonths).values({
-    id,
-    userId: data.userId,
-    year: data.year,
-    month: data.month,
-    createdAt: now,
-    updatedAt: now,
-  }).returning();
+  return await db
+    .insert(userMonths)
+    .values({
+      id,
+      userId: data.userId,
+      year: data.year,
+      month: data.month,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 }
 
-export async function getUserMonth(userId: string, year: number, month: number): Promise<typeof userMonths.$inferSelect | undefined> {
+export async function getUserMonth(
+  userId: string,
+  year: number,
+  month: number,
+): Promise<typeof userMonths.$inferSelect | undefined> {
   return await db
     .select()
     .from(userMonths)
-    .where(and(
-      eq(userMonths.userId, userId),
-      eq(userMonths.year, year),
-      eq(userMonths.month, month),
-    ))
+    .where(
+      and(
+        eq(userMonths.userId, userId),
+        eq(userMonths.year, year),
+        eq(userMonths.month, month),
+      ),
+    )
     .get();
 }
 
-export async function getUserMonths(userId: string): Promise<typeof userMonths.$inferSelect[]> {
+export async function getUserMonths(
+  userId: string,
+): Promise<(typeof userMonths.$inferSelect)[]> {
   return await db
     .select()
     .from(userMonths)
@@ -67,7 +85,10 @@ export async function getUserMonths(userId: string): Promise<typeof userMonths.$
     .all();
 }
 
-export async function updateUserMonth(id: string, data: Partial<CreateUserMonthData>): Promise<typeof userMonths.$inferSelect[]> {
+export async function updateUserMonth(
+  id: string,
+  data: Partial<CreateUserMonthData>,
+): Promise<(typeof userMonths.$inferSelect)[]> {
   const now = new Date();
 
   return await db
@@ -80,22 +101,29 @@ export async function updateUserMonth(id: string, data: Partial<CreateUserMonthD
     .returning();
 }
 
-export async function createBalanceSource(data: CreateBalanceSourceData): Promise<typeof balanceSources.$inferSelect[]> {
+export async function createBalanceSource(
+  data: CreateBalanceSourceData,
+): Promise<(typeof balanceSources.$inferSelect)[]> {
   const now = new Date();
   const id = crypto.randomUUID();
 
-  return await db.insert(balanceSources).values({
-    id,
-    userMonthId: data.userMonthId,
-    name: data.name,
-    currency: data.currency,
-    amount: data.amount,
-    createdAt: now,
-    updatedAt: now,
-  }).returning();
+  return await db
+    .insert(balanceSources)
+    .values({
+      id,
+      userMonthId: data.userMonthId,
+      name: data.name,
+      currency: data.currency,
+      amount: data.amount,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 }
 
-export async function getBalanceSourcesByUserMonth(userMonthId: string): Promise<typeof balanceSources.$inferSelect[]> {
+export async function getBalanceSourcesByUserMonth(
+  userMonthId: string,
+): Promise<(typeof balanceSources.$inferSelect)[]> {
   return await db
     .select()
     .from(balanceSources)
@@ -103,7 +131,10 @@ export async function getBalanceSourcesByUserMonth(userMonthId: string): Promise
     .all();
 }
 
-export async function updateBalanceSource(id: string, data: Partial<CreateBalanceSourceData>): Promise<typeof balanceSources.$inferSelect[]> {
+export async function updateBalanceSource(
+  id: string,
+  data: Partial<CreateBalanceSourceData>,
+): Promise<(typeof balanceSources.$inferSelect)[]> {
   const now = new Date();
 
   return await db
@@ -117,28 +148,33 @@ export async function updateBalanceSource(id: string, data: Partial<CreateBalanc
 }
 
 export async function deleteBalanceSource(id: string): Promise<void> {
-  await db
-    .delete(balanceSources)
-    .where(eq(balanceSources.id, id));
+  await db.delete(balanceSources).where(eq(balanceSources.id, id));
 }
 
-export async function createIncomeEntry(data: CreateIncomeEntryData): Promise<typeof incomeEntries.$inferSelect[]> {
+export async function createIncomeEntry(
+  data: CreateIncomeEntryData,
+): Promise<(typeof incomeEntries.$inferSelect)[]> {
   const now = new Date();
   const id = crypto.randomUUID();
 
-  return await db.insert(incomeEntries).values({
-    id,
-    userMonthId: data.userMonthId,
-    description: data.description,
-    amount: data.amount,
-    currency: data.currency,
-    date: data.date,
-    createdAt: now,
-    updatedAt: now,
-  }).returning();
+  return await db
+    .insert(incomeEntries)
+    .values({
+      id,
+      userMonthId: data.userMonthId,
+      description: data.description,
+      amount: data.amount,
+      currency: data.currency,
+      date: data.date,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 }
 
-export async function getIncomeEntriesByUserMonth(userMonthId: string): Promise<typeof incomeEntries.$inferSelect[]> {
+export async function getIncomeEntriesByUserMonth(
+  userMonthId: string,
+): Promise<(typeof incomeEntries.$inferSelect)[]> {
   return await db
     .select()
     .from(incomeEntries)
@@ -146,7 +182,10 @@ export async function getIncomeEntriesByUserMonth(userMonthId: string): Promise<
     .all();
 }
 
-export async function updateIncomeEntry(id: string, data: Partial<CreateIncomeEntryData>): Promise<typeof incomeEntries.$inferSelect[]> {
+export async function updateIncomeEntry(
+  id: string,
+  data: Partial<CreateIncomeEntryData>,
+): Promise<(typeof incomeEntries.$inferSelect)[]> {
   const now = new Date();
 
   return await db
@@ -160,28 +199,33 @@ export async function updateIncomeEntry(id: string, data: Partial<CreateIncomeEn
 }
 
 export async function deleteIncomeEntry(id: string): Promise<void> {
-  await db
-    .delete(incomeEntries)
-    .where(eq(incomeEntries.id, id));
+  await db.delete(incomeEntries).where(eq(incomeEntries.id, id));
 }
 
-export async function createExpenseEntry(data: CreateExpenseEntryData): Promise<typeof expenseEntries.$inferSelect[]> {
+export async function createExpenseEntry(
+  data: CreateExpenseEntryData,
+): Promise<(typeof expenseEntries.$inferSelect)[]> {
   const now = new Date();
   const id = crypto.randomUUID();
 
-  return await db.insert(expenseEntries).values({
-    id,
-    userMonthId: data.userMonthId,
-    description: data.description,
-    amount: data.amount,
-    currency: data.currency,
-    date: data.date,
-    createdAt: now,
-    updatedAt: now,
-  }).returning();
+  return await db
+    .insert(expenseEntries)
+    .values({
+      id,
+      userMonthId: data.userMonthId,
+      description: data.description,
+      amount: data.amount,
+      currency: data.currency,
+      date: data.date,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 }
 
-export async function getExpenseEntriesByUserMonth(userMonthId: string): Promise<typeof expenseEntries.$inferSelect[]> {
+export async function getExpenseEntriesByUserMonth(
+  userMonthId: string,
+): Promise<(typeof expenseEntries.$inferSelect)[]> {
   return await db
     .select()
     .from(expenseEntries)
@@ -189,7 +233,10 @@ export async function getExpenseEntriesByUserMonth(userMonthId: string): Promise
     .all();
 }
 
-export async function updateExpenseEntry(id: string, data: Partial<CreateExpenseEntryData>): Promise<typeof expenseEntries.$inferSelect[]> {
+export async function updateExpenseEntry(
+  id: string,
+  data: Partial<CreateExpenseEntryData>,
+): Promise<(typeof expenseEntries.$inferSelect)[]> {
   const now = new Date();
 
   return await db
@@ -203,7 +250,5 @@ export async function updateExpenseEntry(id: string, data: Partial<CreateExpense
 }
 
 export async function deleteExpenseEntry(id: string): Promise<void> {
-  await db
-    .delete(expenseEntries)
-    .where(eq(expenseEntries.id, id));
+  await db.delete(expenseEntries).where(eq(expenseEntries.id, id));
 }

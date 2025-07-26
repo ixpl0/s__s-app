@@ -1,4 +1,8 @@
-import type { BalanceSource, IncomeEntry, ExpenseEntry } from '$lib/types/balance';
+import type {
+  BalanceSource,
+  IncomeEntry,
+  ExpenseEntry,
+} from '$lib/types/balance';
 
 export interface MonthData {
   month: number;

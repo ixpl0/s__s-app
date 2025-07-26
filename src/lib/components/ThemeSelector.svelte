@@ -1,5 +1,39 @@
 <script lang="ts">
-  const themes = ['light', 'dark', 'cupcake', 'bumblebee', 'emerald', 'corporate', 'synthwave', 'retro', 'cyberpunk', 'valentine', 'halloween', 'garden', 'forest', 'aqua', 'lofi', 'pastel', 'fantasy', 'wireframe', 'black', 'luxury', 'dracula', 'cmyk', 'autumn', 'business', 'acid', 'lemonade', 'night', 'coffee', 'winter', 'dim', 'nord', 'sunset', 'silk'];
+  const themes = [
+    'light',
+    'dark',
+    'cupcake',
+    'bumblebee',
+    'emerald',
+    'corporate',
+    'synthwave',
+    'retro',
+    'cyberpunk',
+    'valentine',
+    'halloween',
+    'garden',
+    'forest',
+    'aqua',
+    'lofi',
+    'pastel',
+    'fantasy',
+    'wireframe',
+    'black',
+    'luxury',
+    'dracula',
+    'cmyk',
+    'autumn',
+    'business',
+    'acid',
+    'lemonade',
+    'night',
+    'coffee',
+    'winter',
+    'dim',
+    'nord',
+    'sunset',
+    'silk',
+  ];
   type Theme = (typeof themes)[number];
 
   const onChange = (theme: Theme): void => {
@@ -21,12 +55,15 @@
       height="12px"
       viewBox="0 0 2048 2048"
       width="12px"
-      xmlns="http://www.w3.org/2000/svg">
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path d="M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z" />
     </svg>
   </div>
 
-  <ul class="dropdown-content bg-base-300 rounded-box z-1 w-lg p-2 shadow-2xl grid grid-cols-5 gap-2 mt-2">
+  <ul
+    class="dropdown-content bg-base-300 rounded-box z-1 w-lg p-2 shadow-2xl grid grid-cols-5 gap-2 mt-2"
+  >
     {#each themes as theme (theme)}
       <li>
         <input

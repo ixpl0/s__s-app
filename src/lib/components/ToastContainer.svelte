@@ -5,23 +5,14 @@
   function getToastClasses(type: string): string {
     switch (type) {
       case 'success':
-
         return 'alert-success';
-
       case 'error':
-
         return 'alert-error';
-
       case 'warning':
-
         return 'alert-warning';
-
       case 'info':
-
         return 'alert-info';
-
       default:
-
         return 'alert-info';
     }
   }
@@ -30,7 +21,9 @@
 <div class="toast toast-top toast-end z-[9999]">
   {#each $toasts as toast (toast.id)}
     <div
-      class="alert {getToastClasses(toast.type)} shadow-lg max-w-sm cursor-pointer"
+      class="alert {getToastClasses(
+        toast.type,
+      )} shadow-lg max-w-sm cursor-pointer"
       in:fly={{ x: 300, duration: 300 }}
       on:click={() => removeToast(toast.id)}
       on:keydown={(e) => e.key === 'Enter' && removeToast(toast.id)}

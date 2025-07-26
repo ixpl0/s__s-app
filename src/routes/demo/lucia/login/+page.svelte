@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
   import { enhance } from '$app/forms';
   import type { ActionData } from './$types';
 
@@ -9,24 +9,13 @@
 <form action="?/login" method="post" use:enhance>
   <label>
     Username
-    <input
-      name="username"
-
-    />
+    <input name="username" />
   </label>
   <label>
     Password
-    <input
-      name="password"
-      type="password"
-
-    />
+    <input name="password" type="password" />
   </label>
-  <button
-  >Login</button>
-  <button
-    formaction="?/register"
-
-  >Register</button>
+  <button>Login</button>
+  <button formaction="?/register">Register</button>
 </form>
 <p style:color="red">{form?.message ?? ''}</p>

@@ -25,21 +25,20 @@ export const balanceService = {
     currency: string;
     amount: number;
   }) {
-    return apiClient.post<BalanceSourceResponse>(
-      '/api/balance-sources',
-      data,
-      {
-        showSuccessToast: false,
-        showErrorToast: true,
-      },
-    );
+    return apiClient.post<BalanceSourceResponse>('/api/balance-sources', data, {
+      showSuccessToast: false,
+      showErrorToast: true,
+    });
   },
 
-  async updateBalanceSource(id: string, data: {
-    name: string;
-    currency: string;
-    amount: number;
-  }) {
+  async updateBalanceSource(
+    id: string,
+    data: {
+      name: string;
+      currency: string;
+      amount: number;
+    },
+  ) {
     return apiClient.put<BalanceSourceResponse>(
       '/api/balance-sources',
       { id, ...data },
@@ -51,13 +50,10 @@ export const balanceService = {
   },
 
   async deleteBalanceSource(id: string) {
-    return apiClient.delete(
-      `/api/balance-sources?id=${id}`,
-      {
-        showSuccessToast: true,
-        successMessage: 'Источник удален',
-        showErrorToast: true,
-      },
-    );
+    return apiClient.delete(`/api/balance-sources?id=${id}`, {
+      showSuccessToast: true,
+      successMessage: 'Источник удален',
+      showErrorToast: true,
+    });
   },
 };

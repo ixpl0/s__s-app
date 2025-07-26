@@ -22,11 +22,16 @@ export const actions: Actions = {
     const password = formData.get('password');
 
     if (!validateUsername(username)) {
-      return fail(400, { message: 'Invalid username (min 3, max 31 characters, alphanumeric only)' });
+      return fail(400, {
+        message:
+          'Invalid username (min 3, max 31 characters, alphanumeric only)',
+      });
     }
 
     if (!validatePassword(password)) {
-      return fail(400, { message: 'Invalid password (min 6, max 255 characters)' });
+      return fail(400, {
+        message: 'Invalid password (min 6, max 255 characters)',
+      });
     }
 
     const results = await db
@@ -81,12 +86,11 @@ export const actions: Actions = {
     });
 
     try {
-      await db.insert(table.user)
-        .values({
-          id: userId,
-          username,
-          passwordHash,
-        });
+      await db.insert(table.user).values({
+        id: userId,
+        username,
+        passwordHash,
+      });
 
       const sessionToken = auth.generateSessionToken();
       const session = await auth.createSession(sessionToken, userId);
@@ -109,17 +113,17 @@ function generateUserId(): string {
 
 function validateUsername(username: unknown): username is string {
   return (
-    typeof username === 'string'
-		&& username.length >= 3
-		&& username.length <= 31
-		&& /^[a-z0-9_-]+$/.test(username)
+    typeof username === 'string' &&
+    username.length >= 3 &&
+    username.length <= 31 &&
+    /^[a-z0-9_-]+$/.test(username)
   );
 }
 
 function validatePassword(password: unknown): password is string {
   return (
-    typeof password === 'string'
-		&& password.length >= 6
-		&& password.length <= 255
+    typeof password === 'string' &&
+    password.length >= 6 &&
+    password.length <= 255
   );
 }

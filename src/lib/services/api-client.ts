@@ -62,7 +62,8 @@ class ApiClient {
 
       return { data, success: true };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
 
       if (showErrorToast) {
         toast.error(`Ошибка запроса: ${errorMessage}`);
@@ -72,23 +73,41 @@ class ApiClient {
     }
   }
 
-  async get<T = unknown>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<ApiResponse<T>> {
+  async get<T = unknown>(
+    endpoint: string,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+  ): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  async post<T = unknown>(endpoint: string, body?: unknown, options?: Omit<RequestOptions, 'method'>): Promise<ApiResponse<T>> {
+  async post<T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: Omit<RequestOptions, 'method'>,
+  ): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
-      ...options, method: 'POST', body,
+      ...options,
+      method: 'POST',
+      body,
     });
   }
 
-  async put<T = unknown>(endpoint: string, body?: unknown, options?: Omit<RequestOptions, 'method'>): Promise<ApiResponse<T>> {
+  async put<T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: Omit<RequestOptions, 'method'>,
+  ): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, {
-      ...options, method: 'PUT', body,
+      ...options,
+      method: 'PUT',
+      body,
     });
   }
 
-  async delete<T = unknown>(endpoint: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<ApiResponse<T>> {
+  async delete<T = unknown>(
+    endpoint: string,
+    options?: Omit<RequestOptions, 'method' | 'body'>,
+  ): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...options, method: 'DELETE' });
   }
 }

@@ -21,15 +21,18 @@
     'декабрь',
   ];
 
-  $: yearGroups = data.monthsData.reduce((groups: Record<number, MonthData[]>, monthData) => {
-    if (!groups[monthData.year]) {
-      groups[monthData.year] = [];
-    }
+  $: yearGroups = data.monthsData.reduce(
+    (groups: Record<number, MonthData[]>, monthData) => {
+      if (!groups[monthData.year]) {
+        groups[monthData.year] = [];
+      }
 
-    groups[monthData.year].push(monthData);
+      groups[monthData.year].push(monthData);
 
-    return groups;
-  }, {});
+      return groups;
+    },
+    {},
+  );
 
   $: sortedYears = Object.keys(yearGroups)
     .map(Number)
@@ -65,7 +68,8 @@
     <div class="mb-8 text-center">
       <h1 class="text-4xl font-bold mb-2">📊 Таймлайн бюджета</h1>
       <p class="text-lg opacity-70">
-        Добро пожаловать, {data.user.username}! Здесь вы можете отслеживать свои финансы по месяцам.
+        Добро пожаловать, {data.user.username}! Здесь вы можете отслеживать свои
+        финансы по месяцам.
       </p>
     </div>
 
@@ -89,9 +93,7 @@
               🎲 Создать тестовые данные
             {/if}
           </button>
-          <a class="btn btn-ghost" href="/timeline">
-            🔄 Обновить страницу
-          </a>
+          <a class="btn btn-ghost" href="/timeline"> 🔄 Обновить страницу </a>
         </div>
       </div>
     {:else}

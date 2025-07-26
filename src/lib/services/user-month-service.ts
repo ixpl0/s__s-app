@@ -15,13 +15,9 @@ export interface UserMonthResponse {
 
 export const userMonthService = {
   async createUserMonth(data: { year: number; month: number }) {
-    return apiClient.post<UserMonthResponse>(
-      '/api/user-months',
-      data,
-      {
-        showSuccessToast: false,
-        showErrorToast: true,
-      },
-    );
+    return apiClient.post<UserMonthResponse>('/api/user-months', data, {
+      showSuccessToast: false,
+      showErrorToast: true,
+    });
   },
 };

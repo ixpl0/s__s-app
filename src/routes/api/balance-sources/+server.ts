@@ -1,6 +1,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getBalanceSourcesByUserMonth, createBalanceSource, updateBalanceSource, deleteBalanceSource } from '$lib/server/db/budget';
+import {
+  getBalanceSourcesByUserMonth,
+  createBalanceSource,
+  updateBalanceSource,
+  deleteBalanceSource,
+} from '$lib/server/db/budget';
 import { validateSessionToken, sessionCookieName } from '$lib/server/auth';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
@@ -45,9 +50,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
   }
 
   try {
-    const {
-      userMonthId, name, currency, amount,
-    } = await request.json();
+    const { userMonthId, name, currency, amount } = await request.json();
 
     if (!userMonthId || !name || !currency || amount === undefined) {
       return json({ error: 'Missing required fields' }, { status: 400 });
@@ -80,9 +83,7 @@ export const PUT: RequestHandler = async ({ request, cookies }) => {
   }
 
   try {
-    const {
-      id, name, currency, amount,
-    } = await request.json();
+    const { id, name, currency, amount } = await request.json();
 
     if (!id) {
       return json({ error: 'ID is required' }, { status: 400 });

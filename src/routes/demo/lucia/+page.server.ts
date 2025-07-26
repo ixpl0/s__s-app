@@ -24,7 +24,9 @@ export const actions: Actions = {
   },
 };
 
-function requireLogin(): NonNullable<SessionValidationResult['user']> | Redirect {
+function requireLogin():
+  | NonNullable<SessionValidationResult['user']>
+  | Redirect {
   const { locals } = getRequestEvent();
 
   if (!locals.user) {
