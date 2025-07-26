@@ -5,6 +5,7 @@
   export let year: number;
   export let months: MonthData[];
   export let monthNames: string[];
+  export let exchangeRates: Record<string, Record<string, number>>;
 </script>
 
 <li>
@@ -26,6 +27,5 @@
 </li>
 
 {#each months as monthData (monthData.year + monthData.month)}
-  <MonthItem {monthData} {monthNames} />
+  <MonthItem {exchangeRates} {monthData} {monthNames} />
 {/each}
-

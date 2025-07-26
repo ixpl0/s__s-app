@@ -84,11 +84,6 @@ export default tsEslint.config(
         },
         {
           blankLine: 'always',
-          prev: ['case', 'default'],
-          next: '*',
-        },
-        {
-          blankLine: 'always',
           prev: '*',
           next: ['if', 'for', 'while', 'switch', 'try'],
         },
@@ -175,7 +170,7 @@ export default tsEslint.config(
       }],
       'svelte/indent': ['error', {
         indent: 2,
-        switchCase: 2,
+        switchCase: 1,
       }],
       'svelte/max-attributes-per-line': ['error', {
         multiline: 1,
@@ -253,7 +248,6 @@ export default tsEslint.config(
           consistent: true,
         },
       }],
-      '@stylistic/object-property-newline': ['error', { allowAllPropertiesOnSameLine: false }],
       '@stylistic/array-element-newline': ['error', {
         ArrayExpression: 'consistent',
         ArrayPattern: { minItems: 3 },

@@ -2,6 +2,9 @@
   import YearSection from '$lib/components/budget/YearSection.svelte';
   import type { MonthData } from '$lib/types/budget';
   import { monthsData, monthNames } from '$lib/constants/budget';
+  import type { PageData } from './$types';
+
+  export let data: PageData;
 
   // TODO: Replace with real data fetching logic
   // eslint-disable-next-line svelte/no-immutable-reactive-statements
@@ -23,8 +26,10 @@
 <div class="min-h-screen bg-base-100">
   <ul class="timeline timeline-vertical [--timeline-col-start:15ch]">
     {#each years as year (year)}
-      <YearSection {monthNames} months={groupedData[year]} {year} />
+      <YearSection exchangeRates={data.exchangeRates}
+        {monthNames}
+        months={groupedData[year]}
+        {year} />
     {/each}
   </ul>
 </div>
-

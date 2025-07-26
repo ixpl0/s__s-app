@@ -6,6 +6,7 @@ export const monthNames = Array.from({ length: 12 }, (_, i) =>
 
 export const monthsData: MonthData[] = [
   {
+    userMonthId: '',
     month: 6,
     year: 2025,
     startBalance: 33781,
@@ -15,6 +16,7 @@ export const monthsData: MonthData[] = [
     expenses: 4620,
   },
   {
+    userMonthId: '',
     month: 5,
     year: 2025,
     startBalance: 32205,
@@ -24,6 +26,7 @@ export const monthsData: MonthData[] = [
     expenses: 4580,
   },
   {
+    userMonthId: '',
     month: 4,
     year: 2025,
     startBalance: 31942,
@@ -33,6 +36,7 @@ export const monthsData: MonthData[] = [
     expenses: 6350,
   },
   {
+    userMonthId: '',
     month: 3,
     year: 2025,
     startBalance: 29448,
@@ -42,6 +46,7 @@ export const monthsData: MonthData[] = [
     expenses: 5020,
   },
   {
+    userMonthId: '',
     month: 2,
     year: 2025,
     startBalance: 8650,
@@ -51,6 +56,7 @@ export const monthsData: MonthData[] = [
     expenses: 4830,
   },
   {
+    userMonthId: '',
     month: 1,
     year: 2025,
     startBalance: 7200,
@@ -60,6 +66,7 @@ export const monthsData: MonthData[] = [
     expenses: 4680,
   },
   {
+    userMonthId: '',
     month: 0,
     year: 2025,
     startBalance: 8090,
@@ -69,6 +76,7 @@ export const monthsData: MonthData[] = [
     expenses: 4650,
   },
   {
+    userMonthId: '',
     month: 11,
     year: 2024,
     startBalance: 5290,
@@ -78,6 +86,7 @@ export const monthsData: MonthData[] = [
     expenses: 2950,
   },
   {
+    userMonthId: '',
     month: 10,
     year: 2024,
     startBalance: 2490,
@@ -87,6 +96,7 @@ export const monthsData: MonthData[] = [
     expenses: 5320,
   },
   {
+    userMonthId: '',
     month: 9,
     year: 2024,
     startBalance: 3690,
@@ -96,6 +106,7 @@ export const monthsData: MonthData[] = [
     expenses: 3380,
   },
   {
+    userMonthId: '',
     month: 8,
     year: 2024,
     startBalance: 1890,
@@ -105,6 +116,7 @@ export const monthsData: MonthData[] = [
     expenses: 4280,
   },
   {
+    userMonthId: '',
     month: 7,
     year: 2024,
     startBalance: 2690,
@@ -114,6 +126,7 @@ export const monthsData: MonthData[] = [
     expenses: 4320,
   },
   {
+    userMonthId: '',
     month: 6,
     year: 2024,
     startBalance: -510,
@@ -123,6 +136,7 @@ export const monthsData: MonthData[] = [
     expenses: 4600,
   },
   {
+    userMonthId: '',
     month: 5,
     year: 2024,
     startBalance: 140,
@@ -132,6 +146,7 @@ export const monthsData: MonthData[] = [
     expenses: 4020,
   },
   {
+    userMonthId: '',
     month: 4,
     year: 2024,
     startBalance: -1960,

@@ -1,6 +1,7 @@
 <script lang="ts">
   import '../app.css';
   import ThemeSelector from '$lib/components/ThemeSelector.svelte';
+  import ToastContainer from '$lib/components/ToastContainer.svelte';
 </script>
 
 <header class="navbar bg-base-100 shadow-sm min-h-16 mb-4">
@@ -13,3 +14,5 @@
 <main class="container mx-auto px-4">
   <slot></slot>
 </main>
+
+<ToastContainer />

@@ -2,13 +2,34 @@
   import type { MonthData } from '$lib/types/budget';
   import { getBalanceChangeClass, getPocketExpensesClass, toUsd } from '$lib/utils/budget';
   import BalanceModal from './BalanceModal.svelte';
+  import { userMonthService } from '$lib/services/user-month-service';
 
   export let monthData: MonthData;
   export let monthNames: string[];
+  export let exchangeRates: Record<string, Record<string, number>>;
 
   let isBalanceModalOpen = false;
 
-  function openBalanceModal(): void {
+  $: currentMonthRates = (() => {
+    const rateDate = `${monthData.year}-${String(monthData.month + 1).padStart(2, '0')}-01`;
+
+    return (exchangeRates && exchangeRates[rateDate]) || {};
+  })();
+
+  async function openBalanceModal(): Promise<void> {
+    if (!monthData.userMonthId || monthData.userMonthId.trim() === '') {
+      const response = await userMonthService.createUserMonth({
+        year: monthData.year,
+        month: monthData.month,
+      });
+
+      if (response.success && response.data) {
+        monthData.userMonthId = response.data.userMonth.id;
+      } else {
+        return;
+      }
+    }
+
     isBalanceModalOpen = true;
   }
 </script>
@@ -71,7 +92,7 @@
     <div class="stat place-items-center">
       <div class="stat-title">Крупные расходы</div>
       <div class="stat-value text-error">
-        <div class="tooltip tooltip-left font-normal" data-tip="Все крупные расходы за {monthNames[monthData.month]} {monthData.year}. Это оплата квартиры, покупка техники, путешествия и т.д.">
+        <div class="tooltip tooltip-left font-normal" data-tip="Все крупные расходы за {monthNames[monthData.month]} {monthData.year}. ��то оплата квартиры, покупка техники, путешествия и т.д.">
           <button class="btn btn-ghost text-[2rem] font-extrabold">
             {toUsd(monthData.expenses)}
           </button>
@@ -96,7 +117,10 @@
 {#if isBalanceModalOpen}
   <BalanceModal
     bind:isOpen={isBalanceModalOpen}
+    exchangeRates={currentMonthRates}
+    month={monthData.month}
     monthName={monthNames[monthData.month]}
+    userMonthId={monthData.userMonthId}
     year={monthData.year}
   />
 {/if}

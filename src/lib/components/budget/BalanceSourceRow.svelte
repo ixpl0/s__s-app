@@ -3,17 +3,28 @@
   import { currencyOptions } from '$lib/constants/balance';
   import { getCurrencySymbol } from '$lib/utils/currency';
 
+  type BalanceSourceWithValidation = BalanceSource & {
+    hasNameError?: boolean;
+  };
+
   export let source: BalanceSource;
   export let onUpdate: (updatedSource: BalanceSource) => void;
   export let onDelete: () => void;
+  export let exchangeRates: Record<string, number> = {};
+
+  $: currentRate = exchangeRates[source.currency] || 1;
+  $: formattedRate = source.currency === 'USD' ? '1.00' : currentRate.toFixed(2);
+  $: hasNameError = (source as BalanceSourceWithValidation).hasNameError || false;
 
   function handleNameChange(event: Event): void {
     const target = event.target as HTMLInputElement;
+    const value = target.value;
 
     onUpdate({
       ...source,
-      name: target.value,
-    });
+      name: value,
+      hasNameError: undefined,
+    } as BalanceSource);
   }
 
   function handleCurrencyChange(event: Event): void {
@@ -38,13 +49,21 @@
 
 <tr>
   <td>
-    <input
-      bind:value={source.name}
-      class="input input-bordered w-full"
-      on:input={handleNameChange}
-      placeholder="Наличка, Банк TBC"
-      type="text"
-    />
+    <div class="form-control w-full">
+      <input
+        bind:value={source.name}
+        class="input input-bordered w-full"
+        class:input-error={hasNameError}
+        on:input={handleNameChange}
+        placeholder="Наличка, Банк TBC"
+        type="text"
+      />
+      {#if hasNameError}
+        <div class="label">
+          <span class="label-text-alt text-error">Введите имя источника</span>
+        </div>
+      {/if}
+    </div>
   </td>
 
   <td>
@@ -64,10 +83,9 @@
       <input
         bind:value={source.amount}
         class="join-item input input-bordered flex-1"
-        min="0"
-        on:input={handleAmountChange}
+        on:blur={handleAmountChange}
         placeholder="0"
-        step="0.01"
+        step="1"
         type="number"
       />
       <span class="join-item flex items-center justify-center text-sm font-medium w-10 bg-base-200">
@@ -78,19 +96,17 @@
 
   <td>
     <input
-      bind:value={source.amount}
-      class="join-item input input-bordered flex-1"
-      min="0"
-      on:input={handleAmountChange}
-      placeholder="0"
-      step="0.01"
-      type="number"
+      class="input input-bordered w-full"
+      disabled
+      placeholder="1.00"
+      type="text"
+      value={formattedRate}
     />
   </td>
 
   <td class="text-center">
     <button
-      class="btn btn-ghost btn-xs hover:bg-error hover:text-error-content"
+      class="btn btn-ghost btn-xs hover:bg-error hover:text-error-content mt-2"
       on:click={onDelete}
       type="button"
     >

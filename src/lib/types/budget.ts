@@ -1,3 +1,5 @@
+import type { BalanceSource, IncomeEntry, ExpenseEntry } from '$lib/types/balance';
+
 export interface MonthData {
   month: number;
   year: number;
@@ -6,4 +8,11 @@ export interface MonthData {
   pocketExpenses: number;
   income: number;
   expenses: number;
+  userMonthId: string;
+}
+
+export interface MonthDataWithDetails extends MonthData {
+  balanceSources: BalanceSource[];
+  incomeEntries: IncomeEntry[];
+  expenseEntries: ExpenseEntry[];
 }
