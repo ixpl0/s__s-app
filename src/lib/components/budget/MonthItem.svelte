@@ -7,6 +7,7 @@
   } from '$lib/utils/budget';
   import BalanceModal from './BalanceModal.svelte';
   import { userMonthService } from '$lib/services/user-month-service';
+  import { handleError } from '$lib/utils/error-handling';
 
   export let monthData: MonthData;
   export let monthNames: string[];
@@ -16,20 +17,47 @@
 
   $: currentMonthRates = (() => {
     const rateDate = `${monthData.year}-${String(monthData.month + 1).padStart(2, '0')}-01`;
+    const rates = (exchangeRates && exchangeRates[rateDate]) || {};
 
-    return (exchangeRates && exchangeRates[rateDate]) || {};
+    if (typeof rates === 'string') {
+      try {
+        return JSON.parse(rates);
+      } catch (error) {
+        console.error('Failed to parse exchange rates:', error);
+        return {};
+      }
+    }
+
+    return rates;
+  })();
+
+  // Calculate startBalance on frontend from balance sources
+  $: startBalance = (() => {
+    const total = monthData.balanceSources.reduce((sum, source) => {
+      const rate =
+        source.currency === 'USD' ? 1 : currentMonthRates[source.currency] || 1;
+      const convertedAmount = source.amount / rate;
+      return sum + convertedAmount;
+    }, 0);
+
+    return Math.round(total * 100) / 100;
   })();
 
   async function openBalanceModal(): Promise<void> {
     if (!monthData.userMonthId || monthData.userMonthId.trim() === '') {
-      const response = await userMonthService.createUserMonth({
-        year: monthData.year,
-        month: monthData.month,
-      });
+      try {
+        const result = await userMonthService.createUserMonth({
+          year: monthData.year,
+          month: monthData.month,
+        });
 
-      if (response.success && response.data) {
-        monthData.userMonthId = response.data.userMonth.id;
-      } else {
+        if (result?.userMonth?.id) {
+          monthData.userMonthId = result.userMonth.id;
+        } else {
+          return;
+        }
+      } catch (error) {
+        handleError(error, 'openBalanceModal');
         return;
       }
     }
@@ -69,14 +97,14 @@
         <div
           class="tooltip tooltip-right font-normal"
           data-tip="Сумма всех сбережений на начало месяца. Этого хватило бы на {Math.floor(
-            monthData.startBalance / 3500,
+            startBalance / 3500,
           )} мес"
         >
           <button
             class="btn btn-ghost text-[2rem] font-extrabold"
             on:click={openBalanceModal}
           >
-            {toUsd(monthData.startBalance)}
+            {toUsd(startBalance)}
           </button>
         </div>
       </div>
@@ -160,7 +188,6 @@
   <BalanceModal
     bind:isOpen={isBalanceModalOpen}
     exchangeRates={currentMonthRates}
-    month={monthData.month}
     monthName={monthNames[monthData.month]}
     userMonthId={monthData.userMonthId}
     year={monthData.year}

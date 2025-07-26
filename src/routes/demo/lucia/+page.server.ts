@@ -1,14 +1,15 @@
 import * as auth from '$lib/server/auth';
-import { fail, redirect } from '@sveltejs/kit';
-import { getRequestEvent } from '$app/server';
+import { redirect, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import type { Redirect } from '@sveltejs/kit';
-import type { SessionValidationResult } from '$lib/server/auth';
 
-export const load: PageServerLoad = async () => {
-  const user = requireLogin();
+export const load: PageServerLoad = async ({ locals }) => {
+  if (!locals.user) {
+    throw redirect(302, '/demo/lucia/login');
+  }
 
-  return { user };
+  return {
+    user: locals.user,
+  };
 };
 
 export const actions: Actions = {
@@ -23,15 +24,3 @@ export const actions: Actions = {
     return redirect(302, '/demo/lucia/login');
   },
 };
-
-function requireLogin():
-  | NonNullable<SessionValidationResult['user']>
-  | Redirect {
-  const { locals } = getRequestEvent();
-
-  if (!locals.user) {
-    return redirect(302, '/demo/lucia/login');
-  }
-
-  return locals.user;
-}

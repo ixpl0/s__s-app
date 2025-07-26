@@ -1,59 +1,45 @@
 import { apiClient } from './api-client';
+import type { BalanceSourceInput } from '$lib/types/api';
 import type { BalanceSource } from '$lib/types/balance';
 
-export interface BalanceSourcesResponse {
-  balanceSources: BalanceSource[];
-}
-
-export interface BalanceSourceResponse {
-  balanceSource: BalanceSource;
-}
-
 export const balanceService = {
-  async getBalanceSources(userMonthId: string) {
-    return apiClient.get<BalanceSourcesResponse>(
-      `/api/balance-sources?userMonthId=${userMonthId}`,
-      {
-        showErrorToast: true,
-      },
+  async getBalanceSources(
+    userMonthId: string,
+  ): Promise<BalanceSource[] | null> {
+    return apiClient.safeRequest(
+      () =>
+        apiClient.get<BalanceSource[]>(
+          `/balance-sources?userMonthId=${userMonthId}`,
+          {
+            loadingKey: 'balance-sources-load',
+          },
+        ),
+      'getBalanceSources',
     );
   },
 
-  async createBalanceSource(data: {
-    userMonthId: string;
-    name: string;
-    currency: string;
-    amount: number;
-  }) {
-    return apiClient.post<BalanceSourceResponse>('/api/balance-sources', data, {
-      showSuccessToast: false,
-      showErrorToast: true,
-    });
-  },
-
-  async updateBalanceSource(
-    id: string,
-    data: {
-      name: string;
-      currency: string;
-      amount: number;
-    },
-  ) {
-    return apiClient.put<BalanceSourceResponse>(
-      '/api/balance-sources',
-      { id, ...data },
-      {
-        showSuccessToast: false,
-        showErrorToast: true,
-      },
+  async saveBalanceSources(
+    userMonthId: string,
+    sources: BalanceSourceInput[],
+  ): Promise<{ balanceSources: BalanceSource[] } | null> {
+    return apiClient.safeRequest(
+      () =>
+        apiClient.post<{ balanceSources: BalanceSource[] }>(
+          '/balance-sources',
+          { userMonthId, balanceSources: sources },
+          { loadingKey: 'balance-sources-save' },
+        ),
+      'saveBalanceSources',
     );
   },
 
-  async deleteBalanceSource(id: string) {
-    return apiClient.delete(`/api/balance-sources?id=${id}`, {
-      showSuccessToast: true,
-      successMessage: 'Источник удален',
-      showErrorToast: true,
-    });
+  async deleteBalanceSource(id: string): Promise<{ success: boolean } | null> {
+    return apiClient.safeRequest(
+      () =>
+        apiClient.delete<{ success: boolean }>(`/balance-sources/${id}`, {
+          loadingKey: 'balance-source-delete',
+        }),
+      'deleteBalanceSource',
+    );
   },
 };

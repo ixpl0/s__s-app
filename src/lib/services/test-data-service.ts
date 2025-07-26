@@ -10,15 +10,13 @@ export interface TestDataResponse {
 }
 
 export const testDataService = {
-  async createTestData() {
-    return apiClient.post<TestDataResponse>(
-      '/api/create-test-data',
-      undefined,
-      {
-        showSuccessToast: true,
-        successMessage: 'Тестовые данные созданы успешно!',
-        showErrorToast: true,
-      },
+  async createTestData(): Promise<void> {
+    await apiClient.safeRequest(
+      () =>
+        apiClient.post('/create-test-data', undefined, {
+          loadingKey: 'test-data-create',
+        }),
+      'createTestData',
     );
   },
 };

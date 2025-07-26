@@ -1,4 +1,10 @@
-import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
+import {
+  sqliteTable,
+  integer,
+  text,
+  real,
+  unique,
+} from 'drizzle-orm/sqlite-core';
 
 export const user = sqliteTable('user', {
   id: text('id').primaryKey(),
@@ -15,20 +21,26 @@ export const session = sqliteTable('session', {
 });
 
 export const exchangeRates = sqliteTable('exchange_rates', {
-  date: text('date').primaryKey(), // '2025-07-01'
-  rates: text('rates', { mode: 'json' }).notNull(), // '{ USD: 1, GEL: 2.7, … }'
+  date: text('date').primaryKey(),
+  rates: text('rates', { mode: 'json' }).notNull(),
 });
 
-export const userMonths = sqliteTable('user_months', {
-  id: text('id').primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id),
-  year: integer('year').notNull(),
-  month: integer('month').notNull(), // 0-11
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
-});
+export const userMonths = sqliteTable(
+  'user_months',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id),
+    year: integer('year').notNull(),
+    month: integer('month').notNull(),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+  },
+  (table) => ({
+    uniqueUserMonth: unique().on(table.userId, table.year, table.month),
+  }),
+);
 
 export const balanceSources = sqliteTable('balance_sources', {
   id: text('id').primaryKey(),
@@ -36,7 +48,7 @@ export const balanceSources = sqliteTable('balance_sources', {
     .notNull()
     .references(() => userMonths.id),
   name: text('name').notNull(),
-  currency: text('currency').notNull(), // USD, RUB, GEL, TRY, THB, INR
+  currency: text('currency').notNull(),
   amount: real('amount').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
@@ -50,7 +62,7 @@ export const incomeEntries = sqliteTable('income_entries', {
   description: text('description').notNull(),
   amount: real('amount').notNull(),
   currency: text('currency').notNull(),
-  date: text('date').notNull(), // YYYY-MM-DD
+  date: text('date').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 });
@@ -63,7 +75,7 @@ export const expenseEntries = sqliteTable('expense_entries', {
   description: text('description').notNull(),
   amount: real('amount').notNull(),
   currency: text('currency').notNull(),
-  date: text('date').notNull(), // YYYY-MM-DD
+  date: text('date').notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 });

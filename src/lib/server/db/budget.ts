@@ -43,17 +43,36 @@ export async function createUserMonth(
   const now = new Date();
   const id = crypto.randomUUID();
 
-  return await db
-    .insert(userMonths)
-    .values({
-      id,
-      userId: data.userId,
-      year: data.year,
-      month: data.month,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
+  try {
+    return await db
+      .insert(userMonths)
+      .values({
+        id,
+        userId: data.userId,
+        year: data.year,
+        month: data.month,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
+  } catch (error) {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === 'SQLITE_CONSTRAINT_UNIQUE'
+    ) {
+      const existingMonth = await getUserMonth(
+        data.userId,
+        data.year,
+        data.month,
+      );
+      if (existingMonth) {
+        return [existingMonth];
+      }
+    }
+    throw error;
+  }
 }
 
 export async function getUserMonth(
@@ -149,6 +168,59 @@ export async function updateBalanceSource(
 
 export async function deleteBalanceSource(id: string): Promise<void> {
   await db.delete(balanceSources).where(eq(balanceSources.id, id));
+}
+
+export async function saveBalanceSourcesForUserMonth(
+  userMonthId: string,
+  sources: {
+    id?: string;
+    name: string;
+    currency: CurrencyValue;
+    amount: number;
+  }[],
+): Promise<(typeof balanceSources.$inferSelect)[]> {
+  const results = await Promise.all(
+    sources.map(async (source) => {
+      if (source.id) {
+        const existingSource = await db
+          .select()
+          .from(balanceSources)
+          .where(eq(balanceSources.id, source.id))
+          .limit(1);
+
+        if (existingSource.length > 0) {
+          return await updateBalanceSource(source.id, {
+            name: source.name,
+            currency: source.currency,
+            amount: source.amount,
+            userMonthId,
+          });
+        } else {
+          return await db
+            .insert(balanceSources)
+            .values({
+              id: source.id,
+              userMonthId,
+              name: source.name,
+              currency: source.currency,
+              amount: source.amount,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .returning();
+        }
+      } else {
+        return await createBalanceSource({
+          userMonthId,
+          name: source.name,
+          currency: source.currency,
+          amount: source.amount,
+        });
+      }
+    }),
+  );
+
+  return results.flat();
 }
 
 export async function createIncomeEntry(

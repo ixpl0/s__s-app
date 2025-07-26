@@ -2,31 +2,19 @@
   import type { BalanceSource } from '$lib/types/balance';
   import BalanceSourceRow from './BalanceSourceRow.svelte';
   import { invalidateAll } from '$app/navigation';
-  import { toast } from '$lib/stores/toasts';
   import { balanceService } from '$lib/services/balance-service';
+  import { loading } from '$lib/stores/loading';
 
   export let isOpen = false;
   export let monthName = '';
   export let year = 0;
-  export let month = 0;
   export let userMonthId: string;
-  export let exchangeRates: Record<string, number> | string = {};
+  export let exchangeRates: Record<string, number> = {};
 
   let sources: BalanceSource[] = [];
-  let isLoading = false;
-  let isSaving = false;
 
-  $: parsedExchangeRates = (() => {
-    if (typeof exchangeRates === 'string') {
-      try {
-        return JSON.parse(exchangeRates) as Record<string, number>;
-      } catch {
-        return {};
-      }
-    }
-
-    return exchangeRates as Record<string, number>;
-  })();
+  $: isLoading = $loading['balance-sources-load'] || false;
+  $: isSaving = $loading['balance-sources-save'] || false;
 
   $: if (isOpen && userMonthId) {
     loadBalanceSources();
@@ -37,20 +25,12 @@
       return;
     }
 
-    isLoading = true;
+    const result = await balanceService.getBalanceSources(userMonthId);
 
-    try {
-      const response = await balanceService.getBalanceSources(userMonthId);
-
-      if (response.success && response.data) {
-        sources = response.data.balanceSources;
-      } else {
-        sources = [];
-      }
-    } catch {
+    if (result) {
+      sources = result;
+    } else {
       sources = [];
-    } finally {
-      isLoading = false;
     }
   }
 
@@ -65,7 +45,7 @@
   }
 
   function generateId(): string {
-    return Math.random().toString(36).substring(2, 9);
+    return crypto.randomUUID();
   }
 
   function addNewSource(): void {
@@ -90,21 +70,18 @@
 
     if (!source.userMonthId) {
       sources = sources.filter((_, i) => i !== index);
-
       return;
     }
 
     const response = await balanceService.deleteBalanceSource(source.id);
 
-    if (response.success) {
+    if (response?.success) {
       sources = sources.filter((_, i) => i !== index);
     }
   }
 
   async function handleSave(): Promise<void> {
     if (!userMonthId) {
-      toast.error('Ошибка: не удалось определить месяц для сохранения');
-
       return;
     }
 
@@ -115,50 +92,18 @@
         ...source,
         hasNameError: !source.name.trim(),
       }));
-
-      toast.warning('Пожалуйста, заполните названия всех источников');
-
       return;
     }
 
-    isSaving = true;
+    const validSources = sources.filter((source) => source.name.trim());
+    const result = await balanceService.saveBalanceSources(
+      userMonthId,
+      validSources,
+    );
 
-    try {
-      const validSources = sources.filter((source) => source.name.trim());
-
-      const promises = validSources.map(async (source) => {
-        if (source.userMonthId) {
-          return balanceService.updateBalanceSource(source.id, {
-            name: source.name,
-            currency: source.currency,
-            amount: source.amount,
-          });
-        } else {
-          return balanceService.createBalanceSource({
-            userMonthId,
-            name: source.name,
-            currency: source.currency,
-            amount: source.amount,
-          });
-        }
-      });
-
-      const results = await Promise.all(promises);
-      const hasErrors = results.some((result) => !result.success);
-
-      if (hasErrors) {
-        throw new Error('Некоторые источники не удалось сохранить');
-      }
-
+    if (result) {
       await invalidateAll();
-      toast.success('Данные успешно сохранены');
       closeModal();
-    } catch (error) {
-      toast.error(
-        `Ошибка при сохранении данных: ${error instanceof Error ? error.message : String(error)}`,
-      );
-    } finally {
-      isSaving = false;
     }
   }
 </script>
@@ -201,7 +146,7 @@
           <tbody>
             {#each sources as source, index (source.id)}
               <BalanceSourceRow
-                exchangeRates={parsedExchangeRates}
+                {exchangeRates}
                 onDelete={() => deleteSource(index)}
                 onUpdate={(updatedSource) => updateSource(index, updatedSource)}
                 {source}

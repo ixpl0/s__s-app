@@ -1,10 +1,12 @@
 <script lang="ts">
   import type { BalanceSource, CurrencyValue } from '$lib/types/balance';
   import { currencyOptions } from '$lib/constants/balance';
-  import { getCurrencySymbol } from '$lib/utils/currency';
+  import { balanceSourceSchema } from '$lib/types/api';
+  import { z } from 'zod';
 
   type BalanceSourceWithValidation = BalanceSource & {
     hasNameError?: boolean;
+    validationError?: string;
   };
 
   export let source: BalanceSource;
@@ -17,6 +19,29 @@
     source.currency === 'USD' ? '1.00' : currentRate.toFixed(2);
   $: hasNameError =
     (source as BalanceSourceWithValidation).hasNameError || false;
+  $: validationError = (source as BalanceSourceWithValidation).validationError;
+
+  $: {
+    try {
+      balanceSourceSchema.parse(source);
+      if (validationError) {
+        onUpdate({
+          ...source,
+          validationError: undefined,
+        } as BalanceSource);
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError && error.issues.length > 0) {
+        const errorMessage = error.issues[0]?.message;
+        if (errorMessage !== validationError) {
+          onUpdate({
+            ...source,
+            validationError: errorMessage,
+          } as BalanceSource);
+        }
+      }
+    }
+  }
 
   function handleNameChange(event: Event): void {
     const target = event.target as HTMLInputElement;
@@ -40,24 +65,29 @@
 
   function handleAmountChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    const amount = parseFloat(target.value) || 0;
+    const value = target.value;
 
-    onUpdate({
-      ...source,
-      amount,
-    });
+    const amount = value === '' ? 0 : parseFloat(value);
+
+    if (!isNaN(amount)) {
+      onUpdate({
+        ...source,
+        amount,
+      });
+    }
   }
 </script>
 
 <tr>
-  <td>
-    <div class="form-control w-full">
+  <td class="py-3">
+    <div class="form-control">
       <input
         bind:value={source.name}
-        class="input input-bordered w-full"
-        class:input-error={hasNameError}
+        class="input input-bordered input-sm w-full"
+        class:input-error={hasNameError ||
+          (validationError && validationError.includes('имя'))}
         on:input={handleNameChange}
-        placeholder="Наличка, Банк TBC"
+        placeholder="Название источника"
         type="text"
       />
       {#if hasNameError}
@@ -68,10 +98,10 @@
     </div>
   </td>
 
-  <td>
+  <td class="py-3">
     <select
       bind:value={source.currency}
-      class="select select-bordered w-full"
+      class="select select-bordered select-sm w-full"
       on:change={handleCurrencyChange}
     >
       {#each currencyOptions as option (option.value)}
@@ -80,41 +110,45 @@
     </select>
   </td>
 
-  <td>
-    <div class="join w-full">
+  <td class="py-3">
+    <div class="form-control">
       <input
         bind:value={source.amount}
-        class="join-item input input-bordered flex-1"
-        on:blur={handleAmountChange}
-        placeholder="0"
-        step="1"
+        class="input input-bordered input-sm w-full"
+        class:input-error={validationError &&
+          validationError.includes('amount')}
+        on:input={handleAmountChange}
+        placeholder="0.00"
+        step="0.01"
         type="number"
       />
-      <span
-        class="join-item flex items-center justify-center text-sm font-medium w-10 bg-base-200"
-      >
-        {getCurrencySymbol(source.currency)}
-      </span>
+      {#if validationError && validationError.includes('amount')}
+        <div class="label">
+          <span class="label-text-alt text-error">{validationError}</span>
+        </div>
+      {/if}
     </div>
   </td>
 
-  <td>
+  <td class="py-3">
     <input
-      class="input input-bordered w-full"
+      class="input input-bordered input-sm w-full bg-base-200"
       disabled
-      placeholder="1.00"
-      type="text"
+      readonly
       value={formattedRate}
     />
   </td>
 
-  <td class="text-center">
-    <button
-      class="btn btn-ghost btn-xs hover:bg-error hover:text-error-content mt-2"
-      on:click={onDelete}
-      type="button"
-    >
-      ✕
-    </button>
+  <td class="py-3">
+    <div class="mt-2">
+      <button
+        class="btn btn-error btn-xs"
+        on:click={onDelete}
+        title="Удалить источник"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
   </td>
 </tr>

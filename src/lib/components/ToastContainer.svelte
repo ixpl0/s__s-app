@@ -1,37 +1,27 @@
 <script lang="ts">
   import { toasts, removeToast } from '$lib/stores/toasts';
-  import { fade, fly } from 'svelte/transition';
-
-  function getToastClasses(type: string): string {
-    switch (type) {
-      case 'success':
-        return 'alert-success';
-      case 'error':
-        return 'alert-error';
-      case 'warning':
-        return 'alert-warning';
-      case 'info':
-        return 'alert-info';
-      default:
-        return 'alert-info';
-    }
-  }
+  import { fly } from 'svelte/transition';
 </script>
 
-<div class="toast toast-top toast-end z-[9999]">
+<div class="toast toast-top toast-end z-[60]">
   {#each $toasts as toast (toast.id)}
     <div
-      class="alert {getToastClasses(
-        toast.type,
-      )} shadow-lg max-w-sm cursor-pointer"
+      class="alert"
+      class:alert-error={toast.type === 'error'}
+      class:alert-info={toast.type === 'info'}
+      class:alert-success={toast.type === 'success'}
+      class:alert-warning={toast.type === 'warning'}
       in:fly={{ x: 300, duration: 300 }}
-      on:click={() => removeToast(toast.id)}
-      on:keydown={(e) => e.key === 'Enter' && removeToast(toast.id)}
-      out:fade={{ duration: 200 }}
-      role="button"
-      tabindex="0"
+      out:fly={{ x: 300, duration: 200 }}
     >
-      <span class="flex-1 text-center">{toast.message}</span>
+      <span>{toast.message}</span>
+      <button
+        class="btn btn-sm btn-ghost ml-2"
+        on:click={() => removeToast(toast.id)}
+        type="button"
+      >
+        ✕
+      </button>
     </div>
   {/each}
 </div>

@@ -7,7 +7,7 @@ import type {
 export interface MonthData {
   month: number;
   year: number;
-  startBalance: number;
+  balanceSources: BalanceSource[];
   balanceChange: number;
   pocketExpenses: number;
   income: number;
@@ -16,7 +16,6 @@ export interface MonthData {
 }
 
 export interface MonthDataWithDetails extends MonthData {
-  balanceSources: BalanceSource[];
   incomeEntries: IncomeEntry[];
   expenseEntries: ExpenseEntry[];
 }

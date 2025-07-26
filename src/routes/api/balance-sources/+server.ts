@@ -1,130 +1,63 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { balanceSourceSchema, createApiResponse } from '$lib/types/api';
+import { createServerError, ValidationError } from '$lib/utils/error-handling';
 import {
   getBalanceSourcesByUserMonth,
-  createBalanceSource,
-  updateBalanceSource,
-  deleteBalanceSource,
+  saveBalanceSourcesForUserMonth,
 } from '$lib/server/db/budget';
-import { validateSessionToken, sessionCookieName } from '$lib/server/auth';
+import { z } from 'zod';
 
-export const GET: RequestHandler = async ({ url, cookies }) => {
-  const sessionToken = cookies.get(sessionCookieName);
+const requestBodySchema = z.object({
+  userMonthId: z.string().uuid(),
+  balanceSources: z.array(balanceSourceSchema),
+});
 
-  if (!sessionToken) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { user } = await validateSessionToken(sessionToken);
-
-  if (!user) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const userMonthId = url.searchParams.get('userMonthId');
-
-  if (!userMonthId) {
-    return json({ error: 'userMonthId is required' }, { status: 400 });
-  }
-
+export const GET: RequestHandler = async ({ url }) => {
   try {
+    const userMonthId = url.searchParams.get('userMonthId');
+
+    if (!userMonthId) {
+      throw new ValidationError('userMonthId is required');
+    }
+
     const balanceSources = await getBalanceSourcesByUserMonth(userMonthId);
 
-    return json({ balanceSources });
-  } catch {
-    return json({ error: 'Internal server error' }, { status: 500 });
+    return new Response(JSON.stringify(createApiResponse(balanceSources)), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    const { status, body } = createServerError(error);
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 };
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
-  const sessionToken = cookies.get(sessionCookieName);
-
-  if (!sessionToken) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { user } = await validateSessionToken(sessionToken);
-
-  if (!user) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export const POST: RequestHandler = async ({ request }) => {
   try {
-    const { userMonthId, name, currency, amount } = await request.json();
+    const rawBody = await request.json();
 
-    if (!userMonthId || !name || !currency || amount === undefined) {
-      return json({ error: 'Missing required fields' }, { status: 400 });
-    }
+    const { userMonthId, balanceSources } = requestBodySchema.parse(rawBody);
 
-    const [balanceSource] = await createBalanceSource({
+    const savedSources = await saveBalanceSourcesForUserMonth(
       userMonthId,
-      name,
-      currency,
-      amount,
+      balanceSources,
+    );
+
+    return new Response(
+      JSON.stringify(createApiResponse({ balanceSources: savedSources })),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  } catch (error) {
+    const { status, body } = createServerError(error);
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json' },
     });
-
-    return json({ balanceSource });
-  } catch {
-    return json({ error: 'Internal server error' }, { status: 500 });
-  }
-};
-
-export const PUT: RequestHandler = async ({ request, cookies }) => {
-  const sessionToken = cookies.get(sessionCookieName);
-
-  if (!sessionToken) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { user } = await validateSessionToken(sessionToken);
-
-  if (!user) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  try {
-    const { id, name, currency, amount } = await request.json();
-
-    if (!id) {
-      return json({ error: 'ID is required' }, { status: 400 });
-    }
-
-    const [balanceSource] = await updateBalanceSource(id, {
-      name,
-      currency,
-      amount,
-    });
-
-    return json({ balanceSource });
-  } catch {
-    return json({ error: 'Internal server error' }, { status: 500 });
-  }
-};
-
-export const DELETE: RequestHandler = async ({ url, cookies }) => {
-  const sessionToken = cookies.get(sessionCookieName);
-
-  if (!sessionToken) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { user } = await validateSessionToken(sessionToken);
-
-  if (!user) {
-    return json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const id = url.searchParams.get('id');
-
-  if (!id) {
-    return json({ error: 'ID is required' }, { status: 400 });
-  }
-
-  try {
-    await deleteBalanceSource(id);
-
-    return json({ success: true });
-  } catch {
-    return json({ error: 'Internal server error' }, { status: 500 });
   }
 };

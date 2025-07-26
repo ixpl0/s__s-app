@@ -1,115 +1,127 @@
-import { toast } from '$lib/stores/toasts';
+import type { ApiResult, ApiError, ApiResponse } from '$lib/types/api';
+import { handleApiError } from '$lib/utils/error-handling';
+import { withLoading } from '$lib/stores/loading';
 
-export interface ApiResponse<T = unknown> {
-  data?: T;
-  error?: string;
-  success: boolean;
-}
-
-export interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  body?: unknown;
-  headers?: Record<string, string>;
-  showSuccessToast?: boolean;
-  showErrorToast?: boolean;
-  successMessage?: string;
+interface RequestOptions extends RequestInit {
+  loadingKey?: string;
 }
 
 class ApiClient {
-  private baseUrl = '';
+  private baseUrl: string;
 
-  async makeRequest<T = unknown>(
+  constructor(baseUrl = '') {
+    this.baseUrl = baseUrl;
+  }
+
+  private async request<T>(
     endpoint: string,
     options: RequestOptions = {},
-  ): Promise<ApiResponse<T>> {
-    const {
-      method = 'GET',
-      body,
-      headers = {},
-      showSuccessToast = false,
-      showErrorToast = true,
-      successMessage,
-    } = options;
+  ): Promise<ApiResult<T>> {
+    const { loadingKey, ...fetchOptions } = options;
 
-    try {
-      const config: RequestInit = {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...headers,
-        },
-      };
+    const requestFn = async (): Promise<ApiResult<T>> => {
+      try {
+        const response = await fetch(`${this.baseUrl}${endpoint}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            ...fetchOptions.headers,
+          },
+          ...fetchOptions,
+        });
 
-      if (body && method !== 'GET') {
-        config.body = JSON.stringify(body);
+        if (!response.ok) {
+          const errorData: ApiError = await response.json().catch(() => ({
+            success: false,
+            error: `HTTP ${response.status}: ${response.statusText}`,
+            code: 'HTTP_ERROR',
+          }));
+
+          return errorData;
+        }
+
+        const data: ApiResponse<T> = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Network error:', error);
+        return {
+          success: false,
+          error: 'Ошибка сети. Проверьте подключение к интернету.',
+          code: 'NETWORK_ERROR',
+        };
       }
+    };
 
-      const response = await fetch(`${this.baseUrl}${endpoint}`, config);
-
-      if (!response.ok) {
-        const errorMsg = ['HTTP', response.status, response.statusText]
-          .filter(Boolean)
-          .join(' ');
-
-        throw new Error(errorMsg);
-      }
-
-      const data = await response.json();
-
-      if (showSuccessToast && successMessage) {
-        toast.success(successMessage);
-      }
-
-      return { data, success: true };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-
-      if (showErrorToast) {
-        toast.error(`Ошибка запроса: ${errorMessage}`);
-      }
-
-      return { error: errorMessage, success: false };
+    if (loadingKey) {
+      return withLoading(loadingKey, requestFn);
     }
+
+    return requestFn();
   }
 
-  async get<T = unknown>(
+  async get<T>(
     endpoint: string,
-    options?: Omit<RequestOptions, 'method' | 'body'>,
-  ): Promise<ApiResponse<T>> {
-    return this.makeRequest<T>(endpoint, { ...options, method: 'GET' });
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> {
+    return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
-  async post<T = unknown>(
+  async post<T>(
     endpoint: string,
-    body?: unknown,
-    options?: Omit<RequestOptions, 'method'>,
-  ): Promise<ApiResponse<T>> {
-    return this.makeRequest<T>(endpoint, {
+    data?: unknown,
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> {
+    return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body,
+      body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async put<T = unknown>(
+  async put<T>(
     endpoint: string,
-    body?: unknown,
-    options?: Omit<RequestOptions, 'method'>,
-  ): Promise<ApiResponse<T>> {
-    return this.makeRequest<T>(endpoint, {
+    data?: unknown,
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> {
+    return this.request<T>(endpoint, {
       ...options,
       method: 'PUT',
-      body,
+      body: data ? JSON.stringify(data) : undefined,
     });
   }
 
-  async delete<T = unknown>(
+  async delete<T>(
     endpoint: string,
-    options?: Omit<RequestOptions, 'method' | 'body'>,
-  ): Promise<ApiResponse<T>> {
-    return this.makeRequest<T>(endpoint, { ...options, method: 'DELETE' });
+    options?: RequestOptions,
+  ): Promise<ApiResult<T>> {
+    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+  }
+
+  async safeRequest<T>(
+    requestFn: () => Promise<ApiResult<T>>,
+    context?: string,
+  ): Promise<T | null> {
+    try {
+      const result = await requestFn();
+
+      if (!result.success) {
+        handleApiError(result, context);
+        return null;
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error('Safe request error:', error);
+      handleApiError(
+        {
+          success: false,
+          error: 'Неожиданная ошибка при выполнении запроса',
+          code: 'UNEXPECTED_ERROR',
+        },
+        context,
+      );
+      return null;
+    }
   }
 }
 
-export const apiClient = new ApiClient();
+export const apiClient = new ApiClient('/api');

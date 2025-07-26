@@ -26,6 +26,6 @@
   <hr />
 </li>
 
-{#each months as monthData (monthData.year + monthData.month)}
+{#each months as monthData (`${monthData.year}-${monthData.month}`)}
   <MonthItem {exchangeRates} {monthData} {monthNames} />
 {/each}

@@ -52,7 +52,6 @@ export async function getMonthData(
   ]);
 
   const rateDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-  const startBalance = await calculateTotalInUSD(balanceSources, rateDate);
   const income = await calculateIncomeInUSD(incomeEntries, rateDate);
   const majorExpenses = await calculateMajorExpensesInUSD(
     expenseEntries,
@@ -64,13 +63,12 @@ export async function getMonthData(
   return {
     month,
     year,
-    startBalance,
+    balanceSources: balanceSources.map(mapDBToBalanceSource),
     balanceChange,
     pocketExpenses,
     income,
     expenses: majorExpenses,
     userMonthId: userMonth.id,
-    balanceSources: balanceSources.map(mapDBToBalanceSource),
     incomeEntries: incomeEntries.map(mapDBToIncomeEntry),
     expenseEntries: expenseEntries.map(mapDBToExpenseEntry),
   };
@@ -79,30 +77,27 @@ export async function getMonthData(
 export async function getUserMonthsData(userId: string): Promise<MonthData[]> {
   const userMonths = await getUserMonths(userId);
 
-  if (userMonths.length === 0) {
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
-    const monthsData: MonthData[] = [];
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
 
-    for (let i = 0; i < 12; i++) {
+  if (userMonths.length === 0) {
+    return Array.from({ length: 12 }, (_, i) => {
       const monthDate = new Date(currentYear, currentMonth - i, 1);
       const year = monthDate.getFullYear();
       const month = monthDate.getMonth();
 
-      monthsData.push({
+      return {
         month,
         year,
-        startBalance: 0,
+        balanceSources: [],
         balanceChange: 0,
         pocketExpenses: 0,
         income: 0,
         expenses: 0,
         userMonthId: '',
-      });
-    }
-
-    return monthsData;
+      };
+    });
   }
 
   const monthsData = await Promise.all(
@@ -117,7 +112,7 @@ export async function getUserMonthsData(userId: string): Promise<MonthData[]> {
         ? {
             month: monthData.month,
             year: monthData.year,
-            startBalance: monthData.startBalance,
+            balanceSources: monthData.balanceSources,
             balanceChange: monthData.balanceChange,
             pocketExpenses: monthData.pocketExpenses,
             income: monthData.income,
@@ -131,55 +126,30 @@ export async function getUserMonthsData(userId: string): Promise<MonthData[]> {
   return monthsData.filter((data): data is MonthData => data !== null);
 }
 
-async function calculateTotalInUSD(
-  sources: DBBalanceSource[],
-  rateDate: string,
-): Promise<number> {
-  let total = 0;
-
-  for (const source of sources) {
-    total += await convertToUSD(
-      source.amount,
-      toCurrencyValue(source.currency),
-      rateDate,
-    );
-  }
-
-  return total;
-}
-
 async function calculateIncomeInUSD(
   entries: DBIncomeEntry[],
   rateDate: string,
 ): Promise<number> {
-  let total = 0;
+  const totals = await Promise.all(
+    entries.map((entry) =>
+      convertToUSD(entry.amount, toCurrencyValue(entry.currency), rateDate),
+    ),
+  );
 
-  for (const entry of entries) {
-    total += await convertToUSD(
-      entry.amount,
-      toCurrencyValue(entry.currency),
-      rateDate,
-    );
-  }
-
-  return total;
+  return totals.reduce((sum, amount) => sum + amount, 0);
 }
 
 async function calculateMajorExpensesInUSD(
   entries: DBExpenseEntry[],
   rateDate: string,
 ): Promise<number> {
-  let total = 0;
+  const totals = await Promise.all(
+    entries.map((entry) =>
+      convertToUSD(entry.amount, toCurrencyValue(entry.currency), rateDate),
+    ),
+  );
 
-  for (const entry of entries) {
-    total += await convertToUSD(
-      entry.amount,
-      toCurrencyValue(entry.currency),
-      rateDate,
-    );
-  }
-
-  return total;
+  return totals.reduce((sum, amount) => sum + amount, 0);
 }
 
 function mapDBToBalanceSource(dbSource: DBBalanceSource): BalanceSource {

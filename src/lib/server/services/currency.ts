@@ -1,40 +1,70 @@
 import type { CurrencyValue } from '$lib/types/balance';
 import { db } from '$lib/server/db';
 import { exchangeRates } from '$lib/server/db/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
 
 export type ExchangeRateData = Record<string, number>;
 
 const cache = new Map<string, ExchangeRateData>();
 
 export async function getExchangeRates(
-  date: string,
-): Promise<ExchangeRateData | null> {
-  if (cache.has(date)) {
-    const cachedResult = cache.get(date);
+  date: string | string[],
+): Promise<Record<string, ExchangeRateData>> {
+  const dates = Array.isArray(date) ? date : [date];
+  const result: Record<string, ExchangeRateData> = {};
+  const datesToFetch: string[] = [];
 
-    return cachedResult || null;
-  }
-
-  try {
-    const result = await db
-      .select()
-      .from(exchangeRates)
-      .where(eq(exchangeRates.date, date))
-      .get();
-
-    if (result) {
-      const rates = result.rates as ExchangeRateData;
-
-      cache.set(date, rates);
-
-      return rates;
+  // Check cache first for all dates
+  dates.forEach((singleDate) => {
+    if (cache.has(singleDate)) {
+      const cachedRates = cache.get(singleDate);
+      if (cachedRates) {
+        result[singleDate] = cachedRates;
+      }
+    } else {
+      datesToFetch.push(singleDate);
     }
+  });
 
-    return null;
-  } catch {
-    return null;
+  // Fetch missing dates from database
+  if (datesToFetch.length > 0) {
+    try {
+      const dbResults = await db
+        .select()
+        .from(exchangeRates)
+        .where(inArray(exchangeRates.date, datesToFetch));
+
+      dbResults.forEach((dbResult) => {
+        result[dbResult.date] = dbResult.rates as ExchangeRateData;
+      });
+    } catch {
+      // Continue with what we have from cache
+    }
   }
+
+  // Parse all rates from strings to objects and cache them
+  const parsedResult = Object.entries(result).reduce(
+    (acc, [dateKey, rates]) => {
+      let parsedRates: ExchangeRateData;
+
+      if (typeof rates === 'string') {
+        try {
+          parsedRates = JSON.parse(rates);
+        } catch {
+          parsedRates = {};
+        }
+      } else {
+        parsedRates = rates;
+      }
+
+      acc[dateKey] = parsedRates;
+      cache.set(dateKey, parsedRates);
+      return acc;
+    },
+    {} as Record<string, ExchangeRateData>,
+  );
+
+  return parsedResult;
 }
 
 export async function convertToUSD(
@@ -46,7 +76,8 @@ export async function convertToUSD(
     return amount;
   }
 
-  const rates = await getExchangeRates(date);
+  const ratesResult = await getExchangeRates(date);
+  const rates = ratesResult[date];
 
   if (!rates || !rates[fromCurrency]) {
     return amount;
@@ -64,7 +95,8 @@ export async function convertFromUSD(
     return amount;
   }
 
-  const rates = await getExchangeRates(date);
+  const ratesResult = await getExchangeRates(date);
+  const rates = ratesResult[date];
 
   if (!rates || !rates[toCurrency]) {
     return amount;
@@ -95,25 +127,4 @@ export async function saveExchangeRates(
 
 export function clearCache(): void {
   cache.clear();
-}
-
-export async function getExchangeRatesForDates(
-  dates: string[],
-): Promise<Record<string, Record<string, number>>> {
-  try {
-    const results = await db
-      .select()
-      .from(exchangeRates)
-      .where(inArray(exchangeRates.date, dates));
-
-    const ratesMap: Record<string, Record<string, number>> = {};
-
-    for (const result of results) {
-      ratesMap[result.date] = result.rates as Record<string, number>;
-    }
-
-    return ratesMap;
-  } catch {
-    return {};
-  }
 }
